@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kafkloud
+  name: consumer-dpl
+  labels:
+    component: consumer
+    app: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: consumer
+      app: consumer
+  template:
+    metadata:
+      namespace: kafkloud
+      labels:
+        component: consumer
+        app: consumer
+    spec:
+      containers:
+      - name: consumer-ctr
+        image: docker.io/mdross510/kafkloud-consumer
+        ports:
+        - containerPort: 8072
+        imagePullPolicy: Always
+        env:
+        - name: KAFKA_BROKER
+          value: "kafka-svc:9092"
+        - name: KAFKA_GROUP_ID
+          value: "python_example_group_1"
+        - name: KAFKA_TOPICS
+          value: "stream"
+        - name: KAFKA_WAIT_TIMEOUT
+          value: "5s"
+        - name: SERVER_ADDR
+          value: ":8072"
+        - name: SERVER_WRITE_TIMEOUT
+          value: "15s"
+        - name: SERVER_READ_TIMEOUT
+          value: "15s"
+        - name: SERVER_IDLE_TIMEOUT
+          value: "1m"
+        - name: APP_SHUTDOWN_WAIT
+          value: "20s"

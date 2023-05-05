@@ -1,0 +1,17 @@
+### Health test
+GET http://localhost:8072/_health
+
+### Status test
+GET http://localhost:8072/status
+
+### Send a message into Kafka using 'producer' (NOTE: producedr must be running)
+POST http://localhost:8000/produce
+Content-Type: application/json
+
+{
+  "session": 998,
+  "type": "produce",
+  "message": {
+    "text": "this is the message being produced from the consumer test"
+  }
+}

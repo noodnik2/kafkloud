@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kafkloud
+  name: zookeeper-svc
+  labels:
+    component: streamer
+    app: zookeeper
+spec:
+  type: NodePort
+  ports:
+  - name: zookeeper-port
+    port: 2181
+    nodePort: 30181
+    targetPort: 2181
+  selector:
+    component: streamer
+    app: zookeeper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kafkloud
+  name: zookeeper-dpl
+  labels:
+    component: streamer
+    app: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: streamer
+      app: zookeeper
+  template:
+    metadata:
+      namespace: kafkloud
+      name: zookeeper-pod
+      labels:
+        component: streamer
+        app: zookeeper
+    spec:
+      hostname: zookeeper-host
+      containers:
+# for some reason, it can't pull down based upon the hash!
+#      - image: wurstmeister/zookeeper@sha256:3f43f72cb2832e7a5fbed7f7dbcd0c43004357974d8f32555d101bd53e81e74f
+      - name: zookeeper
+        image: wurstmeister/zookeeper
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 2181

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kafkloud
+  name: producer-svc
+  labels:
+    component: producer
+    app: producer
+spec:
+  selector:
+    app: producer
+  type: NodePort
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30000
+      protocol: TCP

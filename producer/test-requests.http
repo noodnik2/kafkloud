@@ -1,0 +1,14 @@
+### Health test
+GET http://localhost:8000/_health
+
+### Produce! test
+POST http://localhost:8000/produce
+Content-Type: application/json
+
+{
+  "session": 998,
+  "type": "produce",
+  "message": {
+    "text": "this is the message being produced from the producer test"
+  }
+}

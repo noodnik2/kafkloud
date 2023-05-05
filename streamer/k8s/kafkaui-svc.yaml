@@ -1,0 +1,60 @@
+# source: https://needablackcoffee.medium.com/my-top-5-tools-to-manage-develop-with-apache-kafka-2e6790a88ef2
+# $ docker run -it -p 8060:8080 -e DYNAMIC_CONFIG_ENABLED=true provectuslabs/kafka-ui
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: kafkloud
+  name: kafkaui-dpl
+  labels:
+    component: streamer
+    app: kafkaui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: streamer
+      app: kafkaui
+  template:
+    metadata:
+      namespace: kafkloud
+      name: kafkaui-pod
+      labels:
+        component: streamer
+        app: kafkaui
+    spec:
+      hostname: kafkaui-host
+      containers:
+      - name: kafkaui
+        image: provectuslabs/kafka-ui
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DYNAMIC_CONFIG_ENABLED
+          value: "true"
+        - name: KAFKA_CLUSTERS_0_NAME
+          value: "Kafkloud"
+        - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+          value: "kafka-svc:9092"
+        - name: KAFKA_CLUSTERS_0_METRICS_PORT
+          value: "9997"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kafkloud
+  name: kafkaui-svc
+  labels:
+    component: streamer
+    app: kafkaui
+spec:
+  selector:
+    component: streamer
+    app: kafkaui
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 8060
+    nodePort: 32060
+    targetPort: 8080
