@@ -12,7 +12,7 @@ GO=go
 help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | grep -v fgrep | sed 's/\(.*\):.*## \(.*\)/\1 - \2/' | sort
 
-update-modules: ## updates the module dependencies
+update-local: ## updates the module dependencies
 	$(GO) mod tidy
 	$(GO) mod download
 	$(GO) mod vendor
@@ -20,7 +20,7 @@ update-modules: ## updates the module dependencies
 build-local: ## builds the application using the currently installed npm packages
 	$(GO) build -o $(APP_NAME)
 
-build-new-local: update-modules build-local ## updates npm then builds the application
+build-new-local: update-local build-local ## updates npm then builds the application
 
 run-local: ## runs the currently built application locally
 	$(GO) run .
