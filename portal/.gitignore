@@ -32,4 +32,4 @@ yarn-error.log*
 next-env.d.ts
 
 # local development environment secrets
-.env*.local
+.env.local

@@ -1,4 +1,7 @@
-# IDEs
-*.idea
-*.iml
-.vscode-test
+# IntelliJ
+**/*.idea
+**/*.iml
+
+# Mac/OSX
+**/.DS_Store
+

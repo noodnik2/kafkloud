@@ -1,0 +1,569 @@
+$ time make apply-k8s-kafkloud deploy-new-k8s
+
+kubectl apply -f k8s
+namespace/kafkloud created
+(cd streamer; make recreate-new-k8s)
+kubectl delete all -n kafkloud -l component=streamer
+No resources found
+kubectl apply -f k8s
+service/kafka-svc created
+deployment.apps/kafka-dpl created
+deployment.apps/kafkaui-dpl created
+service/kafkaui-svc created
+service/zookeeper-svc created
+deployment.apps/zookeeper-dpl created
+(cd producer; make recreate-new-k8s)
+npm update
+
+changed 1 package, and audited 124 packages in 4s
+
+10 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm run build
+
+> producer@1.0.0 build
+> tsc --project .
+
+docker build -t docker.io/mdross510/kafkloud-producer .
+#1 [internal] load build definition from Dockerfile
+#1 sha256:f2497184644cc15a4410843055464036c274f76d27dbcd2845486b8bafca8ee5
+#1 transferring dockerfile: 378B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load .dockerignore
+#2 sha256:57e692381e3ec00621e63f7d7fbfac85bc35365b2b74d976ea3e28b0e271bfb9
+#2 transferring context: 2B done
+#2 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/node:16
+#4 sha256:fcebe6595ccabc9db4d2477733f2265fb18ca302607dd9a9e445f4ebdfd1189a
+#4 ...
+
+#5 [auth] library/node:pull token for registry-1.docker.io
+#5 sha256:190452f557b1d3213465a0ba68be25ff862f10f7887851b6ca4c4e17dc13b33a
+#5 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:16-bullseye-slim
+#3 sha256:2ce3ac4ed0fb2f655f1f1052a31e3753356f987634e69cacbea7bcdf66a1d90e
+#3 DONE 2.8s
+
+#4 [internal] load metadata for docker.io/library/node:16
+#4 sha256:fcebe6595ccabc9db4d2477733f2265fb18ca302607dd9a9e445f4ebdfd1189a
+#4 DONE 2.8s
+
+#11 [builder 1/6] FROM docker.io/library/node:16@sha256:550f484fc5f314b575f5e397c9e2c71d7f218e59729fcda9ffa7ea1fc825dce7
+#11 sha256:fc4e04d066dee84cbd982936df81f366d60d1b9d414e54a7e9a5d226718bfb9b
+#11 DONE 0.0s
+
+#6 [stage-1 1/5] FROM docker.io/library/node:16-bullseye-slim@sha256:7ee0b958bd5f47f54b58f2b9932b1975a4d98d8f332bd2134c2b65514cadb6c6
+#6 sha256:0d68446d9f972d85870e63dce62de6ca806c8e3f1739341d472643e0243d5da8
+#6 DONE 0.0s
+
+#8 [internal] load build context
+#8 sha256:1726e31d1070d5e6fd8471ecb05ea2d23d72867cdc72757138636a9b3c6ee714
+#8 transferring context: 58.94MB 2.1s done
+#8 DONE 2.1s
+
+#12 [builder 2/6] WORKDIR /usr/src/app
+#12 sha256:b7c841cf22b25d8cb1c38c24b38c121201accf605614df975c3e8efa5ac9e7f8
+#12 CACHED
+
+#7 [stage-1 2/5] WORKDIR /usr/src/app
+#7 sha256:b400a8389adea42837025b05f30b039a5fda11e281c59c14fd0bb7feb4f6907b
+#7 CACHED
+
+#9 [stage-1 3/5] COPY package*.json ./
+#9 sha256:9e644e504e078dc2630f218ad78b139b5e771e9d5ce6d60e2e1c706bdb9ca7cd
+#9 DONE 0.3s
+
+#13 [builder 3/6] COPY package*.json ./
+#13 sha256:c119f9882cf283b517e50ef6d136c0bfb87af3647f63d7c72b40f2ce00d667d0
+#13 DONE 0.4s
+
+#14 [builder 4/6] RUN npm ci
+#14 sha256:0dee962107f36a5cfdc99753c18075837962de7ff83c7443abc31a15be0d61e0
+#14 ...
+
+#10 [stage-1 4/5] RUN npm ci --production
+#10 sha256:a9d976103a2c2fbbd383aae106c3634dcaac97e1126b60cf2e62642f5ca71f11
+#10 1.819 npm WARN config production Use `--omit=dev` instead.
+#10 4.719
+#10 4.719 added 71 packages, and audited 72 packages in 3s
+#10 4.719
+#10 4.719 7 packages are looking for funding
+#10 4.719   run `npm fund` for details
+#10 4.720
+#10 4.720 found 0 vulnerabilities
+#10 4.721 npm notice
+#10 4.721 npm notice New major version of npm available! 8.19.4 -> 9.6.6
+#10 4.722 npm notice Changelog: <https://github.com/npm/cli/releases/tag/v9.6.6>
+#10 4.722 npm notice Run `npm install -g npm@9.6.6` to update!
+#10 4.722 npm notice
+#10 DONE 4.9s
+
+#14 [builder 4/6] RUN npm ci
+#14 sha256:0dee962107f36a5cfdc99753c18075837962de7ff83c7443abc31a15be0d61e0
+#14 9.205
+#14 9.205 added 122 packages, and audited 123 packages in 8s
+#14 9.206
+#14 9.206 10 packages are looking for funding
+#14 9.206   run `npm fund` for details
+#14 9.207
+#14 9.207 found 0 vulnerabilities
+#14 9.208 npm notice
+#14 9.208 npm notice New major version of npm available! 8.19.4 -> 9.6.6
+#14 9.208 npm notice Changelog: <https://github.com/npm/cli/releases/tag/v9.6.6>
+#14 9.208 npm notice Run `npm install -g npm@9.6.6` to update!
+#14 9.209 npm notice
+#14 DONE 9.5s
+
+#15 [builder 5/6] COPY . .
+#15 sha256:9b92ed995e05458af6c931edca92781e11d010c036670426c4c25517fadb24c8
+#15 DONE 2.5s
+
+#16 [builder 6/6] RUN npm run build
+#16 sha256:eef507b002538b1fca96ede9bcce713001887040057fe7e181f99231fd10326d
+#16 0.563
+#16 0.563 > producer@1.0.0 build
+#16 0.563 > tsc --project .
+#16 0.563
+#16 DONE 4.2s
+
+#17 [stage-1 5/5] COPY --from=builder /usr/src/app/dist ./dist
+#17 sha256:c345478db948ef523535cfa0b0153aa797fd6c4b4621ff916096bcd33a9812c3
+#17 DONE 0.0s
+
+#18 exporting to image
+#18 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+#18 exporting layers
+#18 exporting layers 0.2s done
+#18 writing image sha256:3f4f308d5b287d087181596ad751edde1af445c8921e5fcc6786b86b4964c1da done
+#18 naming to docker.io/mdross510/kafkloud-producer done
+#18 DONE 0.2s
+docker push docker.io/mdross510/kafkloud-producer
+Using default tag: latest
+The push refers to repository [docker.io/mdross510/kafkloud-producer]
+b03726634437: Preparing
+0362da6c7f82: Preparing
+5422b447e0c7: Preparing
+6784d01969af: Preparing
+73e3e70ee0c7: Preparing
+4b17982b9bd4: Preparing
+b39f552c9ba1: Preparing
+eb3cc496367b: Preparing
+8553b91047da: Preparing
+4b17982b9bd4: Waiting
+b39f552c9ba1: Waiting
+eb3cc496367b: Waiting
+8553b91047da: Waiting
+73e3e70ee0c7: Layer already exists
+6784d01969af: Layer already exists
+b39f552c9ba1: Layer already exists
+4b17982b9bd4: Layer already exists
+eb3cc496367b: Layer already exists
+8553b91047da: Layer already exists
+5422b447e0c7: Pushed
+b03726634437: Pushed
+0362da6c7f82: Pushed
+latest: digest: sha256:75aaa4b761b4376338ae254068026e3621f8caac7f14daad4ea403003a92ea43 size: 2202
+kubectl delete all -n kafkloud -l component=producer
+No resources found
+kubectl apply -f k8s
+deployment.apps/producer-dpl created
+service/producer-svc created
+(cd consumer; make recreate-new-k8s)
+go mod tidy
+go mod download
+go mod vendor
+go build -o consumer
+docker build -t docker.io/mdross510/kafkloud-consumer .
+#1 [internal] load build definition from Dockerfile
+#1 sha256:ebf16799c194125ad3ca3db5ed793162353e532538198bd1b13a6c688b0cef5b
+#1 transferring dockerfile: 459B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 sha256:aee268d972b2d2eba2973d41ab46d6c063ca0b7eddcb6076f5bf1b8c335ed9a6
+#2 transferring context: 2B done
+#2 DONE 0.0s
+
+#3 resolve image config for docker.io/docker/dockerfile:1
+#3 sha256:ac072d521901222eeef550f52282877f196e16b0247844be9ceb1ccc1eac391d
+#3 ...
+
+#4 [auth] docker/dockerfile:pull token for registry-1.docker.io
+#4 sha256:ad59fbacdaefb7c8cfa1ee4bd1664aa0ce260406cefdb1139b81e565b06e14a2
+#4 DONE 0.0s
+
+#3 resolve image config for docker.io/docker/dockerfile:1
+#3 sha256:ac072d521901222eeef550f52282877f196e16b0247844be9ceb1ccc1eac391d
+#3 DONE 1.5s
+
+#5 docker-image://docker.io/docker/dockerfile:1@sha256:39b85bbfa7536a5feceb7372a0817649ecb2724562a38360f4d6a7782a409b14
+#5 sha256:57c85e6929bd09183df396146f0d627479bb510ec8aa151663925f38dad12fe9
+#5 CACHED
+
+#6 [internal] load build definition from Dockerfile
+#6 sha256:49487c0f67957059117177a0c48feb320a715d16b7aec01e5fa427d9014ee197
+#6 DONE 0.0s
+
+#7 [internal] load .dockerignore
+#7 sha256:ebd9769878b24c542df33cb5664ce94ea3c1c6570fe1dd30d693d0c9485bae74
+#7 DONE 0.0s
+
+#9 [internal] load metadata for docker.io/library/golang:1.20.2-alpine3.17
+#9 sha256:2858ee32bbe7d09b98124ef275c24d37242ce86344a0592eaf8635ee53fcbc6a
+#9 ...
+
+#10 [auth] library/golang:pull token for registry-1.docker.io
+#10 sha256:fab2c887d418d19908d9ff132e5b7b6bba91ca3eff92b8924418643383b5954e
+#10 DONE 0.0s
+
+#11 [auth] library/alpine:pull token for registry-1.docker.io
+#11 sha256:89193d28daa4b4473f9d8ee77382885477ecaa0614f3ccc723619d499da5795a
+#11 DONE 0.0s
+
+#9 [internal] load metadata for docker.io/library/golang:1.20.2-alpine3.17
+#9 sha256:2858ee32bbe7d09b98124ef275c24d37242ce86344a0592eaf8635ee53fcbc6a
+#9 DONE 1.3s
+
+#8 [internal] load metadata for docker.io/library/alpine:3.17
+#8 sha256:02b6038a7d6a3f8496654c3122b4ec72f736b06485adb00f5add321d8d6644aa
+#8 DONE 1.5s
+
+#13 [builder 1/7] FROM docker.io/library/golang:1.20.2-alpine3.17@sha256:87734b78d26a52260f303cf1b40df45b0797f972bd0250e56937c42114bf472c
+#13 sha256:392d0b7c5e53d24cf2476e7df705be88ee621bd535274dbb3e26bc8bb2e9c61a
+#13 DONE 0.0s
+
+#12 [stage-1 1/3] FROM docker.io/library/alpine:3.17@sha256:124c7d2707904eea7431fffe91522a01e5a861a624ee31d03372cc1d138a3126
+#12 sha256:42909a26917df41199aea555921cbce1f768cf03cbf4e1f29374960450546818
+#12 DONE 0.0s
+
+#15 [internal] load build context
+#15 sha256:f683ca6ec8ca67835229f7472248ef3a3e0c02276e8993477bcf0f17306dd4b7
+#15 transferring context: 119.53MB 1.5s done
+#15 DONE 1.5s
+
+#14 [builder 2/7] WORKDIR /app
+#14 sha256:b12dfbc9cafd3ad2db1bf6f4db9585e7d67ee8a3e3181858c92bb0a15f590206
+#14 CACHED
+
+#16 [builder 3/7] COPY go.mod go.sum ./
+#16 sha256:1a76171dc92aeb832d48d69c68320e5d606e5c8b02658f8a4aeb872c74e26fff
+#16 CACHED
+
+#17 [builder 4/7] RUN go mod download
+#17 sha256:06635d7d3e478cc71914b13ab6cab5f5701cec9525832ebafc23bac684987871
+#17 CACHED
+
+#18 [builder 5/7] COPY . ./
+#18 sha256:6f6fc365149743f2d844972e202eac74fcc8db6b15abcef95a76e1bb5f09f451
+#18 DONE 0.5s
+
+#19 [builder 6/7] RUN apk add --no-progress --no-cache gcc musl-dev
+#19 sha256:8257cdc7cba93467cf36bf9fee9b165ee4f4f09a11dcb57491f067f9282dd3ef
+#19 0.344 fetch https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/APKINDEX.tar.gz
+#19 0.777 fetch https://dl-cdn.alpinelinux.org/alpine/v3.17/community/x86_64/APKINDEX.tar.gz
+#19 1.103 (1/11) Installing libgcc (12.2.1_git20220924-r4)
+#19 1.119 (2/11) Installing libstdc++ (12.2.1_git20220924-r4)
+#19 1.201 (3/11) Installing binutils (2.39-r2)
+#19 1.418 (4/11) Installing libgomp (12.2.1_git20220924-r4)
+#19 1.441 (5/11) Installing libatomic (12.2.1_git20220924-r4)
+#19 1.451 (6/11) Installing gmp (6.2.1-r2)
+#19 1.478 (7/11) Installing isl25 (0.25-r1)
+#19 1.544 (8/11) Installing mpfr4 (4.1.0-r0)
+#19 1.718 (9/11) Installing mpc1 (1.2.1-r1)
+#19 1.736 (10/11) Installing gcc (12.2.1_git20220924-r4)
+#19 4.711 (11/11) Installing musl-dev (1.2.3-r4)
+#19 4.985 Executing busybox-1.35.0-r29.trigger
+#19 5.005 OK: 152 MiB in 27 packages
+#19 DONE 5.2s
+
+#20 [builder 7/7] RUN go build -a -tags musl -o consumer .
+#20 sha256:3993c5657278362eb69cf83d7ff21b8b80c4c210b88b390ca87055d162e76491
+#20 DONE 20.5s
+
+#21 [stage-1 2/3] COPY --from=builder /app/consumer /
+#21 sha256:96fbc37226c90d132e2a1f98b7f27c990f4931e9f78f907fe16bb2610b4dce0f
+#21 CACHED
+
+#22 [stage-1 3/3] COPY docker.env .env
+#22 sha256:0b11729ee03e64fe76861dd93bd4043db505004fdb1a25b7d983c076bfc4b779
+#22 CACHED
+
+#23 exporting to image
+#23 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+#23 exporting layers done
+#23 writing image sha256:1782eb517ae26ffb3655fe15239b00113ad09fff5384e4fdcfeaaf98f3fca28c done
+#23 naming to docker.io/mdross510/kafkloud-consumer done
+#23 DONE 0.0s
+docker push docker.io/mdross510/kafkloud-consumer
+Using default tag: latest
+The push refers to repository [docker.io/mdross510/kafkloud-consumer]
+4d01fa6caaf8: Preparing
+f3c1ab4f4028: Preparing
+f1417ff83b31: Preparing
+f1417ff83b31: Layer already exists
+4d01fa6caaf8: Layer already exists
+f3c1ab4f4028: Layer already exists
+latest: digest: sha256:9cefb737293e861f3580cf5ef416785fbb9652d6535a89713c63b3f4c6fd96aa size: 946
+kubectl delete all -n kafkloud -l component=consumer
+No resources found
+kubectl apply -f k8s
+deployment.apps/consumer-dpl created
+service/consumer-svc created
+(cd portal; make recreate-new-k8s)
+npm update
+
+changed 6 packages, and audited 417 packages in 15s
+
+151 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm run build
+
+> portal@0.1.0 build
+> next build
+
+- info Loaded env from /Users/martyross/repos/noodnik2/kafkloud/portal/.env.production
+- info Linting and checking validity of types...
+- info Creating an optimized production build...
+- info Compiled successfully
+- info Collecting page data...
+- info Generating static pages (0/5)
+- info Generating static pages (1/5)
+- info Generating static pages (2/5)
+- info Generating static pages (3/5)
+- info Generating static pages (5/5)
+- info Finalizing page optimization...
+
+Route (pages)                              Size     First Load JS
+┌ ○ /                                      1.24 kB         111 kB
+├   /_app                                  0 B            92.3 kB
+├ ○ /404                                   182 B          92.5 kB
+├ ○ /about                                 610 B          92.9 kB
+├ λ /api                                   0 B            92.3 kB
+├ λ /api/_health                           0 B            92.3 kB
+├ λ /api/outbox                            0 B            92.3 kB
+├ λ /api/status                            0 B            92.3 kB
+└ ○ /consumer                              1.21 kB         111 kB
++ First Load JS shared by all              95.6 kB
+  ├ chunks/framework-2c79e2a64abdb08b.js   45.2 kB
+  ├ chunks/main-af3068766efac2e7.js        29.7 kB
+  ├ chunks/pages/_app-b936397abab4f94b.js  16.6 kB
+  ├ chunks/webpack-8fa1640cc84ba8fe.js     750 B
+  └ css/cee3e9912919aaa2.css               3.29 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+
+docker build -t docker.io/mdross510/kafkloud-portal .
+#1 [internal] load build definition from Dockerfile
+#1 sha256:9cb4f269ae188edbb32ca79650cc0ef4c6c73a2a23b886ae45605922d1842070
+#1 transferring dockerfile: 923B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 sha256:9092e349b841377176096dcc9136888d68320f74a141c2b7a60fd9aa717376cc
+#2 transferring context: 118B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:18-alpine
+#3 sha256:c7ddcdb449347fb14fd88eab6b6351683fc669399d296a38e5a23e64c4ea7112
+#3 DONE 0.9s
+
+#4 [base 1/1] FROM docker.io/library/node:18-alpine@sha256:1ccc70acda680aa4ba47f53e7c40b2d4d6892de74817128e0662d32647dd7f4d
+#4 sha256:b023603fa8799e3f09fb74548c2703885c4c0c11690a395800e3b0b7dcf3b6ea
+#4 resolve docker.io/library/node:18-alpine@sha256:1ccc70acda680aa4ba47f53e7c40b2d4d6892de74817128e0662d32647dd7f4d done
+#4 DONE 0.0s
+
+#10 [internal] load build context
+#10 sha256:46b446cc6386a24ca7dcc41e5141e9d0b0af3e3c2fa74b7b4a0f36401f258998
+#10 transferring context: 329.59kB 0.1s done
+#10 DONE 0.2s
+
+#8 [deps 1/4] RUN apk add --no-cache libc6-compat
+#8 sha256:097748a6c4264e8dce3981b45f7c59e4364543893aaf1798e83071f97fe44b09
+#8 CACHED
+
+#9 [deps 2/4] WORKDIR /app
+#9 sha256:563852bf8189fac0574bc409c4a85441209495286b3473b731b492b0d4ab5914
+#9 CACHED
+
+#11 [deps 3/4] COPY package.json package-lock.json* ./
+#11 sha256:d7b2ff00378e2303f98579d30ad9eccefefa02b8de95ebc97f5188c08909b437
+#11 DONE 0.0s
+
+#12 [deps 4/4] RUN npm ci
+#12 sha256:5f8e009bfd26c728b33ef9774628ab5336d05819bd67810756bb4334e567e6b5
+#12 32.35
+#12 32.35 added 416 packages, and audited 417 packages in 30s
+#12 32.35
+#12 32.35 151 packages are looking for funding
+#12 32.35   run `npm fund` for details
+#12 32.35
+#12 32.35 found 0 vulnerabilities
+#12 32.35 npm notice
+#12 32.35 npm notice New minor version of npm available! 9.5.1 -> 9.6.6
+#12 32.35 npm notice Changelog: <https://github.com/npm/cli/releases/tag/v9.6.6>
+#12 32.35 npm notice Run `npm install -g npm@9.6.6` to update!
+#12 32.35 npm notice
+#12 DONE 32.7s
+
+#5 [builder 1/4] WORKDIR /app
+#5 sha256:9b2d266d4894b631a32d657b6851047d9387d6eb0991ab38db9b9e92decfdf31
+#5 CACHED
+
+#13 [builder 2/4] COPY --from=deps /app/node_modules ./node_modules
+#13 sha256:c6ce592fcf8f55b0e093c0eb1adba1730c9ee0ad887d017c7bd514cb7fb2d640
+#13 DONE 6.0s
+
+#14 [builder 3/4] COPY . .
+#14 sha256:d41a47b9ee29bec1b48c3debaa44412efc2fabe9347b41011b521bbbd2831df9
+#14 DONE 0.0s
+
+#15 [builder 4/4] RUN npm run build
+#15 sha256:3179cf5d1e76f71b8046cfc28f23155a6ab5214824b5fd218eeb93b05c83445f
+#15 0.972
+#15 0.972 > portal@0.1.0 build
+#15 0.972 > next build
+#15 0.972
+#15 2.330 - info Linting and checking validity of types...
+#15 9.006 - info Creating an optimized production build...
+#15 18.58 - info Compiled successfully
+#15 18.58 - info Collecting page data...
+#15 35.38 - info Generating static pages (0/5)
+#15 35.50 - info Generating static pages (1/5)
+#15 35.51 - info Generating static pages (2/5)
+#15 35.52 - info Generating static pages (3/5)
+#15 35.54 - info Generating static pages (5/5)
+#15 35.84 - info Finalizing page optimization...
+#15 35.85
+#15 35.87 Route (pages)                              Size     First Load JS
+#15 35.87 ┌ ○ /                                      1.24 kB         111 kB
+#15 35.87 ├   /_app                                  0 B            92.3 kB
+#15 35.87 ├ ○ /404                                   182 B          92.5 kB
+#15 35.87 ├ ○ /about                                 610 B          92.9 kB
+#15 35.87 ├ λ /api                                   0 B            92.3 kB
+#15 35.87 ├ λ /api/_health                           0 B            92.3 kB
+#15 35.87 ├ λ /api/outbox                            0 B            92.3 kB
+#15 35.87 ├ λ /api/status                            0 B            92.3 kB
+#15 35.87 └ ○ /consumer                              1.21 kB         111 kB
+#15 35.87 + First Load JS shared by all              95.6 kB
+#15 35.87   ├ chunks/framework-2c79e2a64abdb08b.js   45.2 kB
+#15 35.87   ├ chunks/main-af3068766efac2e7.js        29.7 kB
+#15 35.87   ├ chunks/pages/_app-b936397abab4f94b.js  16.6 kB
+#15 35.87   ├ chunks/webpack-8fa1640cc84ba8fe.js     750 B
+#15 35.87   └ css/cee3e9912919aaa2.css               3.29 kB
+#15 35.87
+#15 35.87 λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+#15 35.87 ○  (Static)  automatically rendered as static HTML (uses no initial props)
+#15 35.87
+#15 35.96 npm notice
+#15 35.96 npm notice New minor version of npm available! 9.5.1 -> 9.6.6
+#15 35.96 npm notice Changelog: <https://github.com/npm/cli/releases/tag/v9.6.6>
+#15 35.96 npm notice Run `npm install -g npm@9.6.6` to update!
+#15 35.96 npm notice
+#15 DONE 36.0s
+
+#6 [runner 2/6] RUN addgroup --system --gid 1001 nodejs
+#6 sha256:ee5154da1199721a2917d29eec6ee9241c2223ae782b926a37c199cd3f5666fa
+#6 CACHED
+
+#7 [runner 3/6] RUN adduser --system --uid 1001 nextjs
+#7 sha256:e031645c9ff641d09f4a81f7cc4d0483470f009e63c10efde9298de53c1508ad
+#7 CACHED
+
+#16 [runner 4/6] COPY --from=builder /app/public ./public
+#16 sha256:ae772dba1395aa845702b486f8225b47cef8af45d9061b1017cb13084b903aa0
+#16 CACHED
+
+#17 [runner 5/6] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+#17 sha256:226b1dbfa9e11683cd633aeb18fdd27538d7fa653b5ef213e2e50c32880491d8
+#17 DONE 0.7s
+
+#18 [runner 6/6] COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+#18 sha256:1f182e9bcf1e6e29d3085979283b0039a6116345bbba832cc47b4c333e291e63
+#18 DONE 0.1s
+
+#19 exporting to image
+#19 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+#19 exporting layers
+#19 exporting layers 0.4s done
+#19 writing image sha256:bba17b1dd35ccd1a29a76e7eaf037fd5418d974207335742bd00efd6055726d3 done
+#19 naming to docker.io/mdross510/kafkloud-portal done
+#19 DONE 0.4s
+docker push docker.io/mdross510/kafkloud-portal
+Using default tag: latest
+The push refers to repository [docker.io/mdross510/kafkloud-portal]
+5d52caa59076: Preparing
+3b78678a61db: Preparing
+1652a54a4231: Preparing
+bd1c29a55028: Preparing
+777c9d259360: Preparing
+1f326842531f: Preparing
+885a5d40fc11: Preparing
+1b6c3782871e: Preparing
+b0e46d71a47b: Preparing
+f1417ff83b31: Preparing
+1f326842531f: Waiting
+885a5d40fc11: Waiting
+1b6c3782871e: Waiting
+b0e46d71a47b: Waiting
+f1417ff83b31: Waiting
+777c9d259360: Layer already exists
+bd1c29a55028: Layer already exists
+1652a54a4231: Layer already exists
+1f326842531f: Layer already exists
+885a5d40fc11: Layer already exists
+1b6c3782871e: Layer already exists
+f1417ff83b31: Layer already exists
+b0e46d71a47b: Layer already exists
+5d52caa59076: Pushed
+3b78678a61db: Pushed
+latest: digest: sha256:d2eb128a6aee81dce29e281ce330a24f77397f61bc8e310596faf6c9e7fca9e1 size: 2410
+kubectl delete all -n kafkloud -l component=portal
+No resources found
+kubectl apply -f k8s
+deployment.apps/portal-dpl created
+service/portal-svc created
+
+real    4m2.493s
+user    1m8.791s
+sys     0m20.981s
+
+$ kubectl get all -n kafkloud
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/consumer-dpl-67f666bbc4-qzxml    1/1     Running   0          48m
+pod/kafka-dpl-585c4b74ff-tn9c2       1/1     Running   0          49m
+pod/kafkaui-dpl-58bdff9674-6v9f2     1/1     Running   0          49m
+pod/portal-dpl-8989cd6d9-fmg4p       1/1     Running   0          45m
+pod/producer-dpl-569cc5dfc6-8rq4m    1/1     Running   0          48m
+pod/zookeeper-dpl-5564c9bdbf-hcrvs   1/1     Running   0          49m
+
+NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/consumer-svc    NodePort    10.108.21.176    <none>        8072:30072/TCP   48m
+service/kafka-svc       ClusterIP   10.105.118.56    <none>        9092/TCP         49m
+service/kafkaui-svc     NodePort    10.105.204.91    <none>        8060:32060/TCP   49m
+service/portal-svc      NodePort    10.100.248.193   <none>        3000:30080/TCP   45m
+service/producer-svc    NodePort    10.98.186.186    <none>        8000:30000/TCP   48m
+service/zookeeper-svc   NodePort    10.103.159.208   <none>        2181:30181/TCP   49m
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/consumer-dpl    1/1     1            1           48m
+deployment.apps/kafka-dpl       1/1     1            1           49m
+deployment.apps/kafkaui-dpl     1/1     1            1           49m
+deployment.apps/portal-dpl      1/1     1            1           45m
+deployment.apps/producer-dpl    1/1     1            1           48m
+deployment.apps/zookeeper-dpl   1/1     1            1           49m
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/consumer-dpl-67f666bbc4    1         1         1       48m
+replicaset.apps/kafka-dpl-585c4b74ff       1         1         1       49m
+replicaset.apps/kafkaui-dpl-58bdff9674     1         1         1       49m
+replicaset.apps/portal-dpl-8989cd6d9       1         1         1       45m
+replicaset.apps/producer-dpl-569cc5dfc6    1         1         1       48m
+replicaset.apps/zookeeper-dpl-5564c9bdbf   1         1         1       49m

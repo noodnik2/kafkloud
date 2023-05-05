@@ -1,4 +1,4 @@
-# Deploying Kafkloud in GCP
+# Deploying in GCP
 
 ## Prerequisites
 
