@@ -73,7 +73,7 @@ $ kubectl create token dashboard -n default
 <secret>
 ```
 
-Browse now to [the dashboard using the Kubernetes API]().
+Browse now to [the dashboard using the Kubernetes API]( http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/).
 
 #### Routing to `NodePorts` Inside Bare-Metal
 
