@@ -48,7 +48,8 @@ Looks daunting.  See:
 - [with Helm](https://dev.to/thegroo/running-kafka-on-kubernetes-for-local-development-with-helm-2ne8)
 - [from docker-compose](https://kubernetes.io/docs/tasks/configure-pod-container/translate-compose-kubernetes/)
   - Probably naiive to think it relevant in this case
-- [Bitnami #9406](https://github.com/bitnami/charts/issues/9406)
+- [Bitnami Helm Charts](https://github.com/bitnami/charts/tree/main/bitnami/kafka)
+  - [Issue #9406](https://github.com/bitnami/charts/issues/9406)
 - [... in 5 minutes](https://tsuyoshiushio.medium.com/local-kafka-cluster-on-kubernetes-on-your-pc-in-5-minutes-651a2ff4dcde)
   - Possibly quite relevant, but likely outdated (from 2019)
 - [Setting Up Kafka on K8s the Easy Way](https://blog.datumo.io/setting-up-kafka-on-kubernetes-an-easy-way-26ae150b9ca8)
