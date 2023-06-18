@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kafkloud
+  name: seer-dpl
+  labels:
+    component: seer
+    app: seer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: seer
+      app: seer
+  template:
+    metadata:
+      namespace: kafkloud
+      labels:
+        component: seer
+        app: seer
+    spec:
+      containers:
+        - name: seer-ctr
+          image: docker.io/mdross510/kafkloud-seer
+          ports:
+            - containerPort: 8072
+          imagePullPolicy: Always
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka-svc:9092"
+            - name: SERVER_PORT
+              value: "8000"
+            - name: KAFKA_TRANSACTION_TIMEOUT
+              value: "27500"

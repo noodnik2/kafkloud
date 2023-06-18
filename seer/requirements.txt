@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langchain
+chromadb==0.3.23
+openai
+tiktoken
+unstructured
