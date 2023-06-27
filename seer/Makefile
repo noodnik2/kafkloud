@@ -19,7 +19,9 @@ build-local: ## builds the application using the currently installed python pack
 build-new-local: update-local build-local ## updates npm then builds the application
 
 run-local: ## runs the currently built application locally
-	uvicorn app.fastapi:app --reload
+	#uvicorn app.fastapi:app --reload
+	# preserving the line below for its helpfulness in manual development workflow
+	(. .env; export OPENAI_API_KEY; export CHROMA_DB; export KAFKA_BROKER=localhost:9092; uvicorn app.fastapi:app --reload --port 8030)
 
 run-new-local: build-new-local run-local ## runs a newly built application locally
 

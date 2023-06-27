@@ -1,23 +1,36 @@
 version: '3.9'
 
 networks:
-  net:
-#    driver: bridge
+  streamer_kafkloud-backend:
+    external: true
+
+volumes:
+  clickhouse_data:
+    driver: local
+  index_data:
+    driver: local
+  backups:
+    driver: local
 
 services:
   seer:
     image: docker.io/mdross510/kafkloud-seer
+    container_name: seer
+    networks:
+      - streamer_kafkloud-backend
     depends_on:
       - server
     ports:
       - 8030:8030
     environment:
-      - CHROMADB=server:8000
+      - KAFKA_BROKER=broker:9092
+      - CHROMA_DB=chromadb:8000
       - OPENAI_API_KEY
-    networks:
-      - net
   server:
     image: ghcr.io/chroma-core/chroma:0.3.26
+    container_name: chromadb
+    networks:
+      - streamer_kafkloud-backend
     volumes:
       - index_data:/index_data
     # the following 'command' entry should not be necessary; is here only because of the 'ERROR: Failed building wheel for hnswlib' issue
@@ -31,11 +44,12 @@ services:
       - 8000:8000
     depends_on:
       - clickhouse
-    networks:
-      - net
 
   clickhouse:
     image: clickhouse/clickhouse-server:22.9-alpine
+    container_name: clickhouse
+    networks:
+      - streamer_kafkloud-backend
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - CLICKHOUSE_TCP_PORT=9000
@@ -48,13 +62,3 @@ services:
       - backups:/backups
       - ./config/backup_disk.xml:/etc/clickhouse-server/config.d/backup_disk.xml
       - ./config/chroma_users.xml:/etc/clickhouse-server/users.d/chroma.xml
-    networks:
-      - net
-
-volumes:
-  clickhouse_data:
-    driver: local
-  index_data:
-    driver: local
-  backups:
-    driver: local

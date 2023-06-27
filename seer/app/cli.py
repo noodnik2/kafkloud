@@ -1,3 +1,5 @@
+import logging
+from os import getenv
 import sys
 import argparse
 
@@ -21,23 +23,30 @@ have_files_to_load = args.load and len(args.load) > 0
 have_texts_to_accept = args.accept and len(args.accept) > 0
 have_queries = args.query and len(args.query) > 0
 
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+if args.verbose:
+    logger.root.setLevel(logging.DEBUG)
+
 if not have_files_to_load and not have_texts_to_accept and not have_queries:
-    print(f"no action(s) specified")
+    logger.error(f"no action(s) specified")
     parser.print_usage()
     exit(1)
 
 
-def print_verbose(message):
-    if args.verbose:
-        print(message)
-
-
+# load from env / configuration
 load_dotenv()
 
-chromadb_host, chromadb_port = args.chromadb.split(":")
-print_verbose(f"using chromadb({chromadb_host}:{chromadb_port})")
+# get chroma ref from env or default
+chroma_db = getenv("CHROMA_DB", "localhost:8000")
+if args.chromadb:
+    # override from command line if present
+    chroma_db = args.chromadb
 
-seer = Seer(host=chromadb_host, port=chromadb_port, log_fn=print_verbose)
+chromadb_host, chromadb_port = chroma_db.split(":")
+logger.debug(f"using chromadb({chromadb_host}:{chromadb_port})")
+
+seer = Seer(host=chromadb_host, port=chromadb_port)
 
 if args.load:
     seer.load(args.load)

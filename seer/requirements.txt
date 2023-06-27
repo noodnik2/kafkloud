@@ -5,3 +5,4 @@ chromadb==0.3.23
 openai
 tiktoken
 unstructured
+confluent_kafka
