@@ -19,9 +19,8 @@ build-local: ## builds the application using the currently installed python pack
 build-new-local: update-local build-local ## updates npm then builds the application
 
 run-local: ## runs the currently built application locally
-	#uvicorn app.fastapi:app --reload
-	# preserving the line below for its helpfulness in manual development workflow
-	(. .env; export OPENAI_API_KEY; export CHROMA_DB; export KAFKA_BROKER=localhost:9092; uvicorn app.fastapi:app --reload --port 8030)
+	# use 'lsof -ti :8030' to get a list of the PID(s) if needed (e.g., kill -9 `lsof -ti :8030`)
+	(. .env; export OPENAI_API_KEY; export CHROMA_DB=localhost:8000; export KAFKA_BROKER=localhost:9092; uvicorn app.fastapi:app --reload --port 8030)
 
 run-new-local: build-new-local run-local ## runs a newly built application locally
 
@@ -36,7 +35,7 @@ push-image: ## pushes the currently built $(DOCKER_IMAGE) to the external reposi
 push-new-image: build-new-image push-image ## pushes a newly (re-)built $(DOCKER_IMAGE) to the external repository
 
 run-image: ## runs the currently built $(DOCKER_IMAGE) locally
-	docker run -p 8030:8030 --env-file .env $(DOCKER_IMAGE)
+	docker run --env CHROMA_DB=chromadb:8000 --env KAFKA_BROKER=localhost:9092 -p 8030:8030 --network kafkloud-backend --env-file .env $(DOCKER_IMAGE)
 
 run-new-image: build-new-image run-image ## runs a newly built $(DOCKER_IMAGE) locally
 

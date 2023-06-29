@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import logging
 from os import getenv
 import sys

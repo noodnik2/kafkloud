@@ -1,14 +1,10 @@
-FROM python:3.9
-
-WORKDIR /code
+FROM python:3.10-slim-bullseye
 
 COPY ./requirements.txt /code/requirements.txt
 
-RUN pip install -r /code/requirements.txt
+RUN pip install --no-cache-dir -r /code/requirements.txt
 
 COPY ./app /code/app
 
-# TODO: remove assets from image; it's being used to support test use cases
-COPY ./assets /code/assets
-
+WORKDIR /code
 CMD ["uvicorn", "app.fastapi:app", "--host", "0.0.0.0", "--port", "8030"]

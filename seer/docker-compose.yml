@@ -1,7 +1,8 @@
 version: '3.9'
 
 networks:
-  streamer_kafkloud-backend:
+  # if needed: "docker network create -d bridge kafkloud-backend"
+  kafkloud-backend:
     external: true
 
 volumes:
@@ -17,20 +18,20 @@ services:
     image: docker.io/mdross510/kafkloud-seer
     container_name: seer
     networks:
-      - streamer_kafkloud-backend
+      - kafkloud-backend
     depends_on:
-      - server
+      - chromadb
     ports:
       - 8030:8030
     environment:
       - KAFKA_BROKER=broker:9092
       - CHROMA_DB=chromadb:8000
       - OPENAI_API_KEY
-  server:
+  chromadb:
     image: ghcr.io/chroma-core/chroma:0.3.26
     container_name: chromadb
     networks:
-      - streamer_kafkloud-backend
+      - kafkloud-backend
     volumes:
       - index_data:/index_data
     # the following 'command' entry should not be necessary; is here only because of the 'ERROR: Failed building wheel for hnswlib' issue
@@ -49,7 +50,7 @@ services:
     image: clickhouse/clickhouse-server:22.9-alpine
     container_name: clickhouse
     networks:
-      - streamer_kafkloud-backend
+      - kafkloud-backend
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - CLICKHOUSE_TCP_PORT=9000

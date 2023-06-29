@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
     chroma_db = getenv("CHROMA_DB", "localhost:8000")
     kafka_broker = getenv("KAFKA_BROKER")
     if not chroma_db or not kafka_broker or chroma_db == "" or kafka_broker == "":
-        raise "incomplete configuration - missing 'CHROMA_DB' and/or 'KAFKA_BROKER'"
+        raise Exception("incomplete configuration - missing 'CHROMA_DB' and/or 'KAFKA_BROKER'")
     chromadb_host, chromadb_port = chroma_db.split(":")
     app.state.logger.debug(f"using chromadb({chromadb_host}:{chromadb_port})")
     app.state.seer = Seer(host=chromadb_host, port=chromadb_port)

@@ -3,7 +3,9 @@
 version: '3'
 
 networks:
+  # if needed: "docker network create -d bridge kafkloud-backend"
   kafkloud-backend:
+    external: true
 
 services:
   zookeeper:
