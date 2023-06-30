@@ -106,16 +106,18 @@ $ python app/cli.py -v -q "Do you know anything about the Wilymajinkas?"
 
 Below are some tips on accessing `seer` using the HTTP and `streamer` interfaces
 set up by docker with the [docker-compose](./docker-compose.yml) file.  First,
-start the needed services using a dialog like:
+start and initialize the needed dependencies using a dialog like:
 
 ```shell
 $ docker network create -d bridge kafkloud-backend
 $ (cd ../streamer; docker-compose up -d --build)
+$ make initialize-streamer
 $ docker-compose up --build
 ```
 
-- _Note that `streamer` service must be running as well, since the Kafkloud `seer`
-  component provides an interface to it as well._
+#### Notes
+- _Since the Kafkloud `seer` component uses (its own Kafka topics within) `streamer`, note
+  above where the `streamer` service is started, then initialized before starting `seer`_
 
 Once the services are running, the following sub-dialogs can be used:
 

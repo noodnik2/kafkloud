@@ -15,9 +15,10 @@ from langchain.document_loaders import TextLoader
 
 class Seer:
 
-    def __init__(self, host="localhost", port="8000"):
+    def __init__(self, host="localhost", port="8020"):
         chroma_settings = Settings(chroma_server_host=host, chroma_server_http_port=port,
-                                   chroma_api_impl="rest", anonymized_telemetry=False)
+                                   chroma_api_impl="rest", anonymized_telemetry=False,
+                                   persist_directory="chroma_persistence", chroma_db_impl="duckdb+parquet")
         self.logger = logging.getLogger(__name__)
         self.chroma_client = chromadb.Client(chroma_settings)
         self.embeddings = OpenAIEmbeddings()

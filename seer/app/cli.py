@@ -18,7 +18,7 @@ parser.add_argument("-a", "--accept", help="accept text", type=str, action="appe
 parser.add_argument("-l", "--load", help="load file", type=str, action="append")
 parser.add_argument("-q", "--query", help="ask question", type=str, action="append")
 parser.add_argument("-v", "--verbose", help="enable verbose mode", action="store_true")
-parser.add_argument("-c", "--chromadb", help="host:port for chromadb", default="localhost:8000")
+parser.add_argument("-c", "--chromadb", help="host:port for chromadb", default="localhost:8020")
 args = parser.parse_args()
 
 have_files_to_load = args.load and len(args.load) > 0
@@ -40,7 +40,7 @@ if not have_files_to_load and not have_texts_to_accept and not have_queries:
 load_dotenv()
 
 # get chroma ref from env or default
-chroma_db = getenv("CHROMA_DB", "localhost:8000")
+chroma_db = getenv("CHROMA_DB", "localhost:8020")
 if args.chromadb:
     # override from command line if present
     chroma_db = args.chromadb

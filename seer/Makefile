@@ -2,6 +2,7 @@
 APP_NAME=seer
 K8S_NAMESPACE=kafkloud
 DOCKER_IMAGE=docker.io/mdross510/kafkloud-$(APP_NAME)
+KAFKA_IMAGE=confluentinc/cp-kafka:7.3.2
 
 #
 #	NOTE: the "-new-" targets always build from scratch
@@ -20,7 +21,7 @@ build-new-local: update-local build-local ## updates npm then builds the applica
 
 run-local: ## runs the currently built application locally
 	# use 'lsof -ti :8030' to get a list of the PID(s) if needed (e.g., kill -9 `lsof -ti :8030`)
-	(. .env; export OPENAI_API_KEY; export CHROMA_DB=localhost:8000; export KAFKA_BROKER=localhost:9092; uvicorn app.fastapi:app --reload --port 8030)
+	(. .env; export OPENAI_API_KEY; export CHROMA_DB=localhost:8020; export KAFKA_BROKER=localhost:9092; uvicorn app.fastapi:app --reload --port 8030)
 
 run-new-local: build-new-local run-local ## runs a newly built application locally
 
@@ -34,8 +35,13 @@ push-image: ## pushes the currently built $(DOCKER_IMAGE) to the external reposi
 
 push-new-image: build-new-image push-image ## pushes a newly (re-)built $(DOCKER_IMAGE) to the external repository
 
+initialize-streamer: ## create the needed Kafka topics within the "streamer" component
+	for topic in seer-statement seer-question seer-answer; do \
+		docker run --network kafkloud-backend -it $(KAFKA_IMAGE) /bin/kafka-topics --bootstrap-server broker:29092 --topic $$topic --create --partitions 1; \
+	done
+
 run-image: ## runs the currently built $(DOCKER_IMAGE) locally
-	docker run --env CHROMA_DB=chromadb:8000 --env KAFKA_BROKER=localhost:9092 -p 8030:8030 --network kafkloud-backend --env-file .env $(DOCKER_IMAGE)
+	docker run --env CHROMA_DB=chromadb:8020 --env KAFKA_BROKER=localhost:9092 -p 8030:8030 --network kafkloud-backend --env-file .env $(DOCKER_IMAGE)
 
 run-new-image: build-new-image run-image ## runs a newly built $(DOCKER_IMAGE) locally
 

@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
     app.state.logger = logging.getLogger(__name__)
     app.state.logger.info("setting DEBUG logging level")
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
-    chroma_db = getenv("CHROMA_DB", "localhost:8000")
+    chroma_db = getenv("CHROMA_DB", "localhost:8020")
     kafka_broker = getenv("KAFKA_BROKER")
     if not chroma_db or not kafka_broker or chroma_db == "" or kafka_broker == "":
         raise Exception("incomplete configuration - missing 'CHROMA_DB' and/or 'KAFKA_BROKER'")

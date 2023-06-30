@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kafkloud
+  name: chromadb-svc
+  labels:
+    component: seer
+    app: chromadb
+spec:
+  type: NodePort
+  selector:
+    component: seer
+    app: chromadb
+  ports:
+  - name: chromadb-port
+    port: 8020
+    nodePort: 30020
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kafkloud
+  name: chromadb-dpl
+  labels:
+    component: seer
+    app: chromadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: seer
+      app: chromadb
+  template:
+    metadata:
+      namespace: kafkloud
+      name: chromadb-pod
+      labels:
+        component: seer
+        app: chromadb
+    spec:
+      hostname: chromadb-host
+      containers:
+      - name: chromadb
+        image: ghcr.io/chroma-core/chroma:0.3.26
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8020
+        env:
+          # TODO: this "in-memory" configuration is OK for PoC; use a "real" vector database in production - see e.g.:
+          # https://github.com/chroma-core/chroma/blob/666bfc40f3e380d91df2fb0d99d6124c9e53d36e/docker-compose.yml#L18
+          - name: CHROMA_DB_IMPL
+            value: "duckdb+parquet"
+          - name: PERSIST_DIRECTORY
+            value: "persist_directory"
+          - name: ANONYMIZED_TELEMETRY
+            value: "False"

@@ -1,4 +1,22 @@
-# Deploying in GCP
+# Deploying in Google Cloud Platform (GCP)
+
+Using Kubernetes (K8S)
+[context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
+enables us to switch between using a locally deployed K8s instance and the
+Google Kubernetes Engine (GKE), Google's managed Kubernetes offering.
+
+To see what contexts (think: _environments_) are available:
+
+```shell
+$ kubectl config get-contexts
+```
+
+For example, to switch (back) to using the "Docker Desktop" Kubernetes
+environment (if enabled), the command:
+
+```shell
+$ kubectl config use-context docker-desktop
+```
 
 ## Prerequisites
 
