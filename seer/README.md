@@ -93,13 +93,13 @@ $ python app/cli.py -v -q "Do you know anything about the Wilymajinkas?"
 ...
 2023-06-28 14:02:39,396 DEBUG: the answer is:  I'm sorry, I don't know anything about the Wilymajinkas.
 
-$ python app/cli.py -v -a "The Wilymajinkas are a tribe of northeastern Native Americans." \
+$ python app/cli.py -v -a "The Wilymajinkas are a tribe of northeastern Native Pandorians." \
                        -a "They are very tame and should not be feared."
 ...
 
 $ python app/cli.py -v -q "Do you know anything about the Wilymajinkas?"
 ...
-2023-06-28 14:04:39,565 DEBUG: the answer is:  Yes, I know that the Wilymajinkas are a tribe of northeastern Native Americans who are very tame and should not be feared.
+2023-06-28 14:04:39,565 DEBUG: the answer is:  Yes, I know that the Wilymajinkas are a tribe of northeastern Native Pandorians who are very tame and should not be feared.
 ```
 
 ### Via HTTP or `streamer` using `docker-compose`

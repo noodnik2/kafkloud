@@ -4,7 +4,7 @@ GET http://localhost:8030/_health
 POST http://localhost:8030/accept
 Content-Type: text/plain
 
-The Wilymajinkas are a tribe of northeastern Native Americans.
+The Wilymajinkas are a tribe of northeastern Native Pandorians.
 They are very tame and should not be feared.
 Some even say their leader is a mensch.
 Neareastern studies have shown that, if provoked, the populace of the Wilymajinkas
