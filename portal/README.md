@@ -1,38 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Kafkloud Portal 
 
-## Getting Started
+## Origins
 
-First, run the development server:
+This React app is based upon [NextJS Boilerplate](https://vercel.com/templates/next.js/nextjs-boilerplate)
+project (source repo [examples/nextjs](https://github.com/vercel/vercel/tree/main/examples/nextjs)),
+and was converted to use Typescript by following the recipe in
+[this](https://upmostly.com/next-js/how-to-convert-your-next-js-app-to-typescript) article.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+## Development
+
+- Creation of images using AI was done with [DeepAI](https://deepai.org/machine-learning-model/text2img)
+- Creation of the "Favorite Icon" was done with [icoconvert.com](https://icoconvert.com/)
+
+## Running
+
+See useful things to do in the [`Makefile`](./Makefile) targets.
+
+### In Kubernetes
+
+Until we implement a proper ingress controller, port-forwarding is used; e.g.:
+```shell
+$ kubectl port-forward -n kafkloud $(kubectl get pods -n kafkloud -l component=portal --no-headers -o jsonpath='{.items[0].metadata.name}') 30080:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or, if running locally:
+- in Docker Desktop, check the status of the `vpnkit-controller` in the `kube-system` namespace;
+  so long as it's running, we should be able to access `portal` via its `NodePort` address; e.g.,
+  by browsing to `http://localhost:30080`
+- in Minikube browse to `http://$(minikube ip):30080`
+- etc.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Roadmap
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/_health](http://localhost:3000/api/_health). This endpoint can be edited in `pages/api/health.ts`.
+### `portal-beautification`
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Now that `seer` has been rolled out, it's pretty obvious that `portal`
+needs to be enhanced to allow for sending and receiving from
+multiple `streamer` topics, and plain text display of values
+received on topics.  The `portal-beautification` branch was
+created for this purpose.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Here's the general goal as sketched out:
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+![B](notes/beautification-design1.svg)
