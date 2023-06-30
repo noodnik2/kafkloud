@@ -77,7 +77,9 @@ independent deployment components:
 
 Summary notes are below, and are augmented in [docs](docs).
 
-### `portal` Front-end
+The components of `kafkloud` are described below.
+
+### `portal`
 
 The primary functional concern of `portal` is to provide the main user interface 
 for the `kafkloud` stack.  
@@ -96,7 +98,7 @@ framework could be a good one to leverage with both `React` and `Typescript`.
 > $ kubectl port-forward -n kafkloud $(kubectl get pods -n kafkloud -l component=portal --no-headers -o jsonpath='{.items[0].metadata.name}') 30080:3000
 > ```
 
-### `producer` Back-end
+### `producer`
 
 The primary concern of `producer` is to send events / messages (e.g., as a "data stream")
 into `streamer`.
@@ -104,7 +106,7 @@ into `streamer`.
 To favor gaining additional experience using `NodeJS` in a back-end context,
 this will be built using `ExpressJS` and `Typescript`.
 
-### `streamer` Service
+### `streamer` 
 
 The primary concern of `streamer` is to accept data (e.g., representing "events" or
 other types of "messages") on one end, and make them available to one or more
@@ -122,10 +124,16 @@ implemented in as much of a "standalone" deployment of `Kafka` as is practical.
 > $ kubectl port-forward -n kafkloud $(kubectl get pods -n kafkloud -l app=kafkaui --no-headers -o jsonpath='{.items[0].metadata.name}') 30080:3000
 > ```
 
-### `consumer` Back-end
+### `consumer` 
 The primary concern of `consumer` is to read and process data from the stream.
 
 To help maintain familiarity with it, `golang` was chosen to implement this service.
+
+### `seer` 
+The `seer` component will "learn" from the content of messages it receives from `streamer`
+enabling it to answer related questions via its API layer, available to `portal`.
+
+`seer` is implemented in `Python`.
 
 ## Deployment
 
@@ -136,10 +144,16 @@ environments (e.g., Docker Desktop, Minikube, GCP/GKE or AWS/EKS, ...)
 
 ### Workflow
 
-Three workflows supported by `Makefile` targets are typically used to deploy into local,
-Docker and Kubernetes deployment environments.  Many of the targets have a `-new-`
-variant which performs the indicated step after performing all the prior steps in the
-workflow first - i.e., it's like performing a "fresh build."
+Development and deployment workflows are generally supported by `Makefile` targets,
+defined in the main folder and within each of the (component) subprojects.
+These workflows support building and deployment of the components into local,
+Docker and Kubernetes environments.  Many of the `Makefile` targets have a `-new-`
+variant which performs the indicated step after performing all the prior steps in
+the workflow first - i.e., it's like performing a "fresh build."
+
+While targets in the top-level `Makefile` are used to orchestrate deployment into
+a Kubernetes environment, additional targets in the component-level `Makefile`s
+support deployment into local and Docker environments.
 
 #### Local
 

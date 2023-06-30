@@ -1,0 +1,8 @@
+chromadb-client==0.3.27.dev0
+confluent-kafka==2.1.1
+fastapi==0.98.0
+langchain==0.0.209
+openai==0.27.8
+tiktoken==0.4.0
+unstructured==0.7.7
+uvicorn==0.22.0

@@ -1,0 +1,40 @@
+version: '3.9'
+
+networks:
+  # if needed: "docker network create -d bridge kafkloud-backend"
+  kafkloud-backend:
+    external: true
+
+volumes:
+  index_data:
+    driver: local
+
+services:
+  seer:
+    image: docker.io/mdross510/kafkloud-seer
+    container_name: seer
+    networks:
+      - kafkloud-backend
+    depends_on:
+      - chromadb
+    ports:
+      - 8030:8030
+    environment:
+      - KAFKA_BROKER=broker:9092
+      - CHROMA_DB=chromadb:8020
+      - OPENAI_API_KEY
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:0.3.26
+    container_name: chromadb
+    networks:
+      - kafkloud-backend
+    volumes:
+      - index_data:/index_data
+    command: uvicorn chromadb.app:app --reload --workers 1 --host 0.0.0.0 --port 8020 --log-config log_config.yml
+    environment:
+      - CHROMA_DB_IMPL=duckdb+parquet
+      - PERSIST_DIRECTORY=persist_directory
+      - HNSWLIB_NO_NATIVE=1
+      - ANONYMIZED_TELEMETRY=False
+    ports:
+      - 8020:8020

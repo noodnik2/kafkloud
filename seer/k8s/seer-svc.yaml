@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kafkloud
+  name: seer-svc
+  labels:
+    component: seer
+    app: seer
+spec:
+  type: NodePort
+  selector:
+    component: seer
+    app: seer
+  ports:
+    - name: seer-port
+      port: 8030
+      nodePort: 30030
+      targetPort: 8030
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kafkloud
+  name: seer-dpl
+  labels:
+    component: seer
+    app: seer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: seer
+      app: seer
+  template:
+    metadata:
+      namespace: kafkloud
+      name: seer-pod
+      labels:
+        component: seer
+        app: seer
+    spec:
+      containers:
+        - name: seer-ctr
+          image: docker.io/mdross510/kafkloud-seer
+          ports:
+            - containerPort: 8030
+          imagePullPolicy: Always
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka-svc:9092"
+            - name: CHROMA_DB
+              value: "chromadb-svc:8020"
+          envFrom:
+            # kubectl create secret generic seer-dotenv --from-env-file=.env
+            - secretRef:
+                name: seer-dotenv
+      initContainers:
+        - name: seer-init-streamer-topics
+          image: confluentinc/cp-kafka:7.3.2
+          command: [ '/bin/bash', '-c', 'for t in statement question answer; do /bin/kafka-topics --bootstrap-server kafka-svc:9092 --topic seer-$t --create --partitions 1 || :; done' ]

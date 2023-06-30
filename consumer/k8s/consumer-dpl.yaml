@@ -31,7 +31,7 @@ spec:
         - name: KAFKA_GROUP_ID
           value: "python_example_group_1"
         - name: KAFKA_TOPICS
-          value: "stream"
+          value: "stream,seer-answer"
         - name: KAFKA_WAIT_TIMEOUT
           value: "5s"
         - name: SERVER_ADDR
