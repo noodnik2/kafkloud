@@ -1,7 +1,10 @@
-import Image from 'next/image'
-// import { Inter } from 'next/font/google'
 import Consumer from "@/pages/consumer";
+import {RecoilRoot} from "recoil";
 
 export default function Home() {
-    return <Consumer />
+    return (
+        <RecoilRoot>
+            <Consumer />
+        </RecoilRoot>
+    );
 }
