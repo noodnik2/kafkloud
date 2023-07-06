@@ -85,7 +85,7 @@ func printEnv(when string) {
 		"APP_SHUTDOWN_WAIT",
 	}
 
-	fmt.Printf("environment(%s)\n", when)
+	log.Printf("environment(%s)\n", when)
 	for _, v := range vs {
 		vv := os.Getenv(v)
 		fmt.Printf("  - %s: '%s'\n", v, vv)

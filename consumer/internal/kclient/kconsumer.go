@@ -2,13 +2,12 @@ package kclient
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"sync/atomic"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
-	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/configs"
-	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/controller"
 	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/util"
 )
 
@@ -19,27 +18,28 @@ import (
 
 */
 
+type Processor interface {
+	ProcessMessage(topic, message string) error
+}
+
 type KafkaConsumer struct {
-	kConfig    *configs.KafkaConfig
-	ctx        context.Context
-	controller controller.Controller
-	quitChan   chan string
+	Url         string
+	GroupId     string
+	Topics      []string
+	WaitTimeout time.Duration
+	Ctx         context.Context
+	Processor   Processor
+	util.ComponentErrorHandler
+	DoneChan    chan time.Time
+	quitRequest atomic.Bool
 }
 
-func NewKafkaConsumer(ctx context.Context, kConfig *configs.KafkaConfig, controller controller.Controller) *KafkaConsumer {
-	return &KafkaConsumer{
-		kConfig:    kConfig,
-		controller: controller,
-		ctx:        ctx,
-	}
-}
+func (kc *KafkaConsumer) Launch() error {
 
-func (kc *KafkaConsumer) Launch(errHandler util.ComponentErrorHandler) error {
-
-	fmt.Printf("kc.kConfig.KafkaUrl(%s)\n", kc.kConfig.KafkaUrl)
-	kafkaListener, errNewConsumer := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": kc.kConfig.KafkaUrl,
-		"group.id":          kc.kConfig.KafkaGroupId,
+	log.Printf("kc.kConfig.KafkaUrl(%s)\n", kc.Url)
+	consumer, errNewConsumer := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": kc.Url,
+		"group.id":          kc.GroupId,
 		//"auto.create.topics.enable": true,
 		"allow.auto.create.topics": true,
 		//"auto.offset.reset": "earliest",
@@ -48,53 +48,66 @@ func (kc *KafkaConsumer) Launch(errHandler util.ComponentErrorHandler) error {
 		return errNewConsumer
 	}
 
-	topics := kc.kConfig.KafkaTopics
-	fmt.Printf("subscribing to(%v)\n", topics)
-	if errSubscribe := kafkaListener.SubscribeTopics(topics, nil); errSubscribe != nil {
+	topics := kc.Topics
+	log.Printf("subscribing Kafka listener(%v)\n", topics)
+	if errSubscribe := consumer.SubscribeTopics(topics, nil); errSubscribe != nil {
 		log.Printf("can't subscribe to Kafka topics(%v) ...\n", topics)
-		closeConsumer(kafkaListener)
+		closeConsumer(consumer)
 		return errSubscribe
 	}
 
 	go func() {
+
 		var errKafkaMessagePump error
-		defer func() { closeConsumer(kafkaListener) }()
+		defer func() { log.Printf("Kafka listener(%v) stopped; err=%v...\n", topics, errKafkaMessagePump) }()
+		defer func() { kc.DoneChan <- time.Now(); log.Printf("Kafka listener exited\n") }()
+		defer func() { closeConsumer(consumer) }()
+
 		for {
 
-			select {
-			case <-kc.quitChan:
-				log.Printf("Kafka listener closing...\n")
+			if kc.quitRequest.Load() {
+				log.Printf("Kafka listener(%v) closing...\n", topics)
 				break
-			default:
 			}
 
-			log.Printf("Kafka listener waiting...\n")
+			log.Printf("Kafka listener(%v) waiting...\n", topics)
+
 			var kafkaMsg *kafka.Message
-			kafkaMsg, errKafkaMessagePump = kafkaListener.ReadMessage(kc.kConfig.KafkaWaitTimeout)
+			kafkaMsg, errKafkaMessagePump = consumer.ReadMessage(kc.WaitTimeout)
 			if errKafkaMessagePump != nil {
 				if errKafkaMessagePump.(kafka.Error).Code() == kafka.ErrTimedOut {
 					continue
 				}
-				log.Printf("Kafka listener encountered an error: %v msg(%v)\n", errKafkaMessagePump, kafkaMsg)
-				if errHandler(errKafkaMessagePump) {
-					log.Printf("Kafka listener stopped due to the error: %v msg(%v)\n", errKafkaMessagePump, kafkaMsg)
+				log.Printf("Kafka listener(%v) encountered an error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
+				if kc.ComponentErrorHandler(errKafkaMessagePump) {
+					log.Printf("Kafka listener(%v) stopped due to the error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
 					break
 				}
 				continue
 			}
 			messageText := string(kafkaMsg.Value)
-			log.Printf("received Kafka message: %s\n", messageText)
-			kc.controller.ProcessMessage(messageText)
+			var messageTopic string
+			if kafkaMsg.TopicPartition.Topic != nil {
+				messageTopic = *kafkaMsg.TopicPartition.Topic
+			}
+			log.Printf("Kafka listener(%v) received topic(%s) message: %s\n", topics, messageTopic, messageText)
+			if errProcess := kc.Processor.ProcessMessage(messageTopic, messageText); errProcess != nil {
+				log.Printf("Kafka listener(%v) stopped due to an error processing the message: %v msg(%v)\n", topics, errProcess, kafkaMsg)
+				break
+			}
 		}
-		log.Printf("Kafka listener stopped; err=%v...\n", errKafkaMessagePump)
 	}()
 
-	log.Printf("launched Kafka listener\n")
+	log.Printf("launched Kafka listener(%v)\n", topics)
 	return nil
 }
 
 func (kc *KafkaConsumer) Close() error {
-	kc.quitChan <- "close"
+	log.Printf("signaling Kafka listener(%v) to close\n", kc.Topics)
+	kc.quitRequest.Store(true)
+	log.Printf("waiting for Kafka listener(%v) to close\n", kc.Topics)
+	<-kc.DoneChan
+	log.Printf("Kafka listener(%v) has closed\n", kc.Topics)
 	return nil
 }
 
