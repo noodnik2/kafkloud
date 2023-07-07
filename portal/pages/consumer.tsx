@@ -1,42 +1,58 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import Head from "next/head";
+import Button from "@/components/Button";
+import {useRecoilState} from "recoil";
+import {itemWithID} from "@/components/CommonProps";
+import LogWindow from "@/components/LogWindow";
+import MessageProducer from "@/components/MessageProducer";
+import MessageConsumer from "@/components/MessageConsumer";
 
 export default function Consumer() {
 
-    const [nConsumed, setNConsumed] = useState(-1);
+    // recoil items
+    const consumerLogID = 'consumerLog'
+    const statusLogID = 'statusText'
+
+    const textAreaClassName = "p-2 overflow-y-auto w-full h-24 min-h-full"
+
+    const [, setStatusText] = useRecoilState(itemWithID(statusLogID))
+    const [, setConsumerText] = useRecoilState(itemWithID(consumerLogID))
+
     const [consumerUpdateCount, setConsumerUpdateCount] = useState(0);
-    const [statusText, setStatusText] = useState('');
+
+    const updateStatus = (newLogEntry: string) => {
+        setStatusText(currentLog => [...currentLog, newLogEntry]);
+    }
+
+    const updateConsumerLog = (newLogEntry: string) => {
+        setConsumerText(currentLog => [...currentLog, newLogEntry]);
+    }
 
     const refreshConsumer = () => {
-        // refresh consumer
-        // const url = `${getServiceAddr("consumer")}`;
         const url = `/api/status`;
         console.log(`get(${url})`)
         axios.get(url)
             .then((response) => {
-                const consumerStatusResponse = `consumerStatusResponse(${JSON.stringify(response.data)})`
-                setNConsumed(response.data.n_consumed);
-                setStatusText(consumerStatusResponse);
+                updateStatus(JSON.stringify(response))
+                updateConsumerLog(JSON.stringify(response.data));
             })
             .catch((error) => {
                 const axiosErrorStatus = `axiosErrorStatus(${error})`;
                 console.error(axiosErrorStatus);
-                setStatusText(axiosErrorStatus);
+                updateStatus(axiosErrorStatus)
             });
-    };
 
-    useEffect(() => {
-        // schedule a consumer refresh
-        const timer = setTimeout(() => {
-            // trigger a consumer refresh
-            refreshConsumer();
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, [consumerUpdateCount]);
+    }
 
-    const sendMessage = (message: FormDataEntryValue | null) => {
-        console.log(`sendMessage(${message})`);
+    useEffect(() => () => clearTimeout(setTimeout(refreshConsumer, 2000)), [consumerUpdateCount]);
+
+    const postToProducer = (payload: object) => {
+
+        const producerRequest = JSON.stringify(payload)
+
+        updateStatus(`postToProducer(${producerRequest})`);
+
         const axiosHeaders = {
             headers: {
                 'Content-Type': 'application/json'
@@ -45,68 +61,88 @@ export default function Consumer() {
 
         const url = `/api/outbox`;
         console.log(`post(${url})`)
-        axios.post(url, message, axiosHeaders)
+        axios.post(url, producerRequest, axiosHeaders)
             .then((response) => {
                 const producerRequestResponse = `producerRequestResponseStatusText(${response.statusText})`;
-                setStatusText(producerRequestResponse);
+                updateStatus(producerRequestResponse);
                 console.log(`triggering a consumer update`);
                 setConsumerUpdateCount(consumerUpdateCount + 1);
             })
             .catch((error) => {
                 const producerRequestError = `producerRequestError(${error})`;
                 console.error(producerRequestError);
-                setStatusText(producerRequestError);
+                updateStatus(producerRequestError);
             });
-    };
 
-    // @ts-ignore
-    function submitProduceRequest(e) {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        sendMessage(formData.get("message"));
     }
 
-    const BUTTON_STYLES = "border border-blue-700 rounded m-1 py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-bold"
+    /**
+        deliver() delivers the message to the producer
+     */
+    const deliver = (topic: string, message: string) => {
+        updateStatus(`deliver to topic(${topic}): "${message}"`);
+        postToProducer({
+            topic: topic,
+            key: new Date().toISOString(),
+            message: message
+        })
+    }
+
+    /**
+        startConsumer() stops the current consumer process (if any) and starts
+                        a new one, listening on the indicated topics
+     */
+    const startConsumer = (topics: string[]) => {
+        // TODO do what the contract says above; must wait until we have an API or Kafka client (preferred / suggested)
+        updateStatus(`startConsumer(${topics}); TODO implement`)
+        refreshConsumer()
+    }
+
+    const title = (text: string) => {
+        return (
+            <h1 className="p-2 text-2xl decoration-2 font-bold">{text}</h1>
+        );
+    }
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-around p-24 font-sans backdrop ">
+        <main className="flex items-center justify-around font-sans">
             <Head>
                 <title>Consumer</title>
             </Head>
 
-            <div className="border-2 bg-blue-50">
-                <ConsumerCard nConsumed={nConsumed} />
-            </div>
-
-            <div className="border-2 bg-blue-50">
-                {title("Producer Submission")}
-                <div className="m-1 border-2">
-                    <form method="post" onSubmit={submitProduceRequest}>
-                        <div className="border-2">
-                            <label>
-                                <textarea
-                                    className="mr-0.5"
-                                    name="message"
-                                    defaultValue='{"topic": "stream", "key":"k1", "message":{"text": "w1 w2"}}'
-                                    rows={10}
-                                    cols={75}
-                                />
-                            </label>
-                        </div>
-                        <div className="">
-                            <label>
-                                <button type="submit" className={BUTTON_STYLES}>Send</button>
-                                <button type="reset" className={BUTTON_STYLES}>Reset</button>
-                            </label>
-                        </div>
-                    </form>
+            <div className="p-2 m-5 w-full shadow-2xl drop-shadow-lg space-y-3">
+                <div>
+                    <Button name="test" onClick={() => {
+                        setStatusText(oldArray => [...oldArray, 'testing setting the status text']);
+                    }} />
                 </div>
-            </div>
-
-            <div className="border-2">
-                {title("Response")}
-                <div className="p-1 m-0.5 bg-cyan-300 border-2 border-dotted">
-                    <ResponseCard text={JSON.stringify(statusText)}></ResponseCard>
+                <div className="border-2 border-black bg-blue-50">
+                    {title("Status")}
+                    <LogWindow
+                        loggerId={statusLogID}
+                        loggerDescription="Consumer status updates"
+                        textAreaClassName={textAreaClassName}
+                    />
+                </div>
+                <div className="border-2 border-black bg-blue-50">
+                    {title("Messages")}
+                    <div className="box-border border-dashed border-2">
+                        <MessageProducer
+                            knownTopics={['stream', 'seer-statement', 'seer-question']}
+                            selectedTopic='stream'
+                            textAreaClassName={textAreaClassName}
+                            onDeliver={deliver}
+                        />
+                    </div>
+                    <div className="box-border border-dashed border-2">
+                        <MessageConsumer
+                            knownTopics={['stream', 'seer-answer']}
+                            selectedTopics={['stream', 'seer-answer']}
+                            textAreaClassName={textAreaClassName}
+                            outputItemID={consumerLogID}
+                            onStartConsumer={startConsumer}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -114,35 +150,3 @@ export default function Consumer() {
     );
 }
 
-type ConsumerCardProps = {
-    nConsumed: number
-}
-
-const ConsumerCard = ({nConsumed}: ConsumerCardProps) => {
-    return (
-        <>
-            {title("Consumer Status")}
-            <div className="m-1 border-2">
-                <ul>
-                    <li>nConsumed: {nConsumed}</li>
-                </ul>
-            </div>
-        </>
-    );
-}
-
-type ResponseCardProps = {
-    text: string
-}
-
-const ResponseCard = ({text}: ResponseCardProps) => {
-    return (
-        <p>{text}</p>
-    );
-}
-
-const title = (text: string) => {
-    return (
-        <h1 className="text-3xl underline decoration-2 font-bold bg-fuchsia-100">{text}</h1>
-    );
-}
