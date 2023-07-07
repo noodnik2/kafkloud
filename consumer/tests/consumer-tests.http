@@ -1,5 +1,5 @@
 
-GET http://localhost:7072/consume?topics=seer-answer HTTP/1.1
+GET http://localhost:8072/consume?topics=seer-answer HTTP/1.1
 Host: localhost:8072
 Accept: */*
 User-Agent: curl/7.88.1

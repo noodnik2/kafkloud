@@ -34,10 +34,14 @@ func main() {
 		ReadTimeout:  parms.readTimeout,
 		WriteTimeout: parms.writeTimeout,
 		IdleTimeout:  parms.idleTimeout,
-		//Handler:      http.HandlerFunc(nonCancelingSlowHandler), // TRY THIS ONE
-		Handler: http.HandlerFunc(cancelingSlowHandler), // OR THIS ONE
+		Handler:      http.HandlerFunc(nonCancelingSlowHandler), // TRY THIS ONE
+		//Handler: http.HandlerFunc(cancelingSlowHandler), // OR THIS ONE
 		ConnState: func(conn net.Conn, state http.ConnState) {
 			log.Printf("connection state change; conn(%v), state(%v)\n", conn.RemoteAddr(), state)
+		},
+		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
+			cancelingContext, _ := context.WithTimeout(ctx, parms.writeTimeout)
+			return cancelingContext
 		},
 	}
 
@@ -53,7 +57,7 @@ func cancelingSlowHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	go func() {
-		generateSlowResponse(w)
+		generateSlowResponse(w, r)
 		select {
 		case <-ctx.Done():
 			log.Println("request canceled")
@@ -72,15 +76,30 @@ func cancelingSlowHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("leaving handler")
 }
 
-func nonCancelingSlowHandler(w http.ResponseWriter, _ *http.Request) {
-	generateSlowResponse(w)
+func nonCancelingSlowHandler(w http.ResponseWriter, r *http.Request) {
+	// Below is to play with the newer (since go 1.20) "ResponseController" API
+	// (hint: doesn't seem to work as we expect it until now)
+	//rc := http.NewResponseController(w)
+	//// Set a write deadline in 5 seconds time.
+	//err := rc.SetWriteDeadline(time.Now().Add(parms.writeTimeout * time.Second))
+	//if err != nil {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	_, _ = w.Write([]byte(err.Error()))
+	//	return
+	//}
+	generateSlowResponse(w, r)
 }
 
-func generateSlowResponse(w http.ResponseWriter) {
+func generateSlowResponse(w http.ResponseWriter, r *http.Request) {
 	log.Printf("entering response handler sleep for %d\n", parms.responseDelay)
 	writeResponse(w, "response1 before sleep\n")
-	// Simulate a long-running task
-	time.Sleep(parms.responseDelay)
+	select {
+	case <-r.Context().Done():
+		log.Printf("request context timed out\n")
+		return
+	case <-time.After(parms.responseDelay):
+		log.Printf("simulated long-running task completed\n")
+	}
 	writeResponse(w, "response2 after sleep\n")
 	log.Printf("leaving response handler\n")
 }
@@ -88,6 +107,10 @@ func generateSlowResponse(w http.ResponseWriter) {
 func writeResponse(w http.ResponseWriter, message string) {
 	log.Printf("sending a response(%s)\n", message)
 	n, err := w.Write([]byte(message))
-	w.(http.Flusher).Flush()
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	} else {
+		log.Printf("NOTE: response writer could not be flushed\n")
+	}
 	log.Printf("return from send is n(%d) err(%v)\n", n, err)
 }
