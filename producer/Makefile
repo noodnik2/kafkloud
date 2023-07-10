@@ -34,7 +34,7 @@ push-image: ## pushes the currently built $(DOCKER_IMAGE) to the external reposi
 push-new-image: build-new-image push-image ## pushes a newly (re-)built $(DOCKER_IMAGE) to the external repository
 
 run-image: ## runs the currently built $(DOCKER_IMAGE) locally
-	docker run -p 3000:3000 $(DOCKER_IMAGE)
+	docker run -p 8000:8000 --network kafkloud-backend --name $(APP_NAME) -e KAFKA_BROKER=broker:9092 -e SERVER_PORT=8000 $(DOCKER_IMAGE)
 
 run-new-image: build-new-image run-image ## runs a newly built $(DOCKER_IMAGE) locally
 

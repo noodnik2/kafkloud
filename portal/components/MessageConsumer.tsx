@@ -12,7 +12,7 @@ interface MessageConsumerProps extends TextAreaProps {
     onStartConsumer: (topics: string[]) => void
 }
 
-export default ({textAreaClassName = "", knownTopics = [], selectedTopics = [], outputItemID, onStartConsumer}: MessageConsumerProps): JSX.Element => {
+const MessageConsumer = ({textAreaClassName = "", knownTopics = [], selectedTopics = [], outputItemID, onStartConsumer}: MessageConsumerProps): JSX.Element => {
 
     const [currentlySelectedTopics, setCurrentlySelectedTopics] = useState(selectedTopics);
 
@@ -51,4 +51,6 @@ export default ({textAreaClassName = "", knownTopics = [], selectedTopics = [], 
             </div>
         </div>
     );
-}
+};
+
+export default MessageConsumer;

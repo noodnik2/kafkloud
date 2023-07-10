@@ -185,6 +185,34 @@ to deploy into GCP.
 
 For more details, see _[GCP Deployment Notes](docs/gcp-deployment.md)_.
 
+### Networking
+
+The back-end components of Kafkloud can talk to each other on a common VPC network.
+In the `docker` deployments, a `bridge` network named `kafkloud-backend` is created
+and used for this purpose.
+
+The single, user-facing UI component of `portal` (i.e., the NextJS React browser
+components) could conceivably access its single point of entry to the `portal`
+back-end on a separate network; however, as of this writing, the same network
+is used (e.g., `kafkloud-backend` in the Docker deployments).
+
+#### Port Assignment
+
+An attempt is made to standardize and catalog the network addresses of the
+service across the supported deployment environments, as follows:
+
+| Component  | Docker              | Kubernetes                     |
+|------------|-------------------------|--------------------------------|
+| `portal`   | `portal:3000`           | `portal-svc:3000`              |
+| `consumer` | `consumer:8072`         | `consumer-svc:8072`            |
+| `producer` | `producer:8000`         | `producer-svc:8000`            |
+| `seer`     | `seer:8030`             | `seer-svc:8030`                |
+| `seer`     | `chromadb:8020`         | `chromadb-svc:8020`            |
+| `streamer`  | `broker:9092,9997,29092` | `broker-svc:9092,9997,29092`   |
+| `streamer`  | `kafkaui:8060`          | `kafkaui-svc:8060`             |
+| `streamer` | `zookeeper:2181,2888,3888`            | `zookeeper-svc:2181,2888,3888` |
+
+
 ## For Further Exploration
 
 Some additional technologies and tools are identified as potentially helpful to

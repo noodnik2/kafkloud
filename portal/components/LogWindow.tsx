@@ -7,7 +7,7 @@ interface LogWindowProps extends TextAreaProps {
     loggerId: string
 }
 
-export default ({textAreaClassName = "", loggerDescription = '', loggerId}: LogWindowProps): JSX.Element => {
+const LogWindow = ({textAreaClassName = "", loggerDescription = '', loggerId}: LogWindowProps): JSX.Element => {
 
     const [logText] = useRecoilState(itemWithID(loggerId))
 
@@ -17,8 +17,10 @@ export default ({textAreaClassName = "", loggerDescription = '', loggerId}: LogW
                 className={textAreaClassName}
                 readOnly
                 placeholder={loggerDescription}
-                value={logText.map(s => `${toLocalLogTime(new Date())} ${s}`).join('\n')}
+                value={logText.join('\n')}
             />
         </div>
     );
-}
+};
+
+export default LogWindow;

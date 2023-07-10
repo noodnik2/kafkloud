@@ -1,14 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import axios from 'axios';
 import Head from "next/head";
 import Button from "@/components/Button";
 import {useRecoilState} from "recoil";
-import {itemWithID} from "@/components/CommonProps";
+import {itemWithID, toLocalLogTime} from "@/components/CommonProps";
 import LogWindow from "@/components/LogWindow";
 import MessageProducer from "@/components/MessageProducer";
 import MessageConsumer from "@/components/MessageConsumer";
 
-export default function Consumer() {
+const Consumer = (): JSX.Element => {
 
     // recoil items
     const consumerLogID = 'consumerLog'
@@ -21,31 +21,17 @@ export default function Consumer() {
 
     const [consumerUpdateCount, setConsumerUpdateCount] = useState(0);
 
+    const timestamp = (s: string) => {
+        return `${toLocalLogTime(new Date())} ${s}`
+    }
+
     const updateStatus = (newLogEntry: string) => {
-        setStatusText(currentLog => [...currentLog, newLogEntry]);
+        setStatusText(currentLog => [...currentLog, timestamp(newLogEntry)]);
     }
 
     const updateConsumerLog = (newLogEntry: string) => {
-        setConsumerText(currentLog => [...currentLog, newLogEntry]);
+        setConsumerText(currentLog => [...currentLog, timestamp(newLogEntry)]);
     }
-
-    const refreshConsumer = () => {
-        const url = `/api/status`;
-        console.log(`get(${url})`)
-        axios.get(url)
-            .then((response) => {
-                updateStatus(JSON.stringify(response))
-                updateConsumerLog(JSON.stringify(response.data));
-            })
-            .catch((error) => {
-                const axiosErrorStatus = `axiosErrorStatus(${error})`;
-                console.error(axiosErrorStatus);
-                updateStatus(axiosErrorStatus)
-            });
-
-    }
-
-    useEffect(() => () => clearTimeout(setTimeout(refreshConsumer, 2000)), [consumerUpdateCount]);
 
     const postToProducer = (payload: object) => {
 
@@ -88,14 +74,51 @@ export default function Consumer() {
         })
     }
 
+    let consumer
+
+    const stopConsumer = () => {
+        // TODO: can this be implemented?
+        // updateStatus(`TODO: stop current consumer`)
+    }
+
+    const startConsumer = async (topics: string[]) => {
+
+        // Relevant:
+        // - For XMLHttpRequest2:
+        //   - https://streams.spec.whatwg.org/#other-specs-rs-reading
+        //   - https://streams.spec.whatwg.org/#read-loop
+        const url = `/api/consume?topics=${topics}`;
+
+        // see:
+        // - https://developer.chrome.com/articles/fetch-streaming-requests/
+        const backendResponse = await fetch(url);
+        if (!backendResponse.body) {
+            updateStatus(`error: no body from fetch to backend`)
+            return
+        }
+        const reader = backendResponse.body
+            .pipeThrough(new TextDecoderStream('utf-8'))
+            .getReader()
+        while(true) {
+            const {value, done} = await reader.read()
+            if (done) {
+                break
+            }
+            updateConsumerLog(`${value}`)
+        }
+
+    }
+
     /**
         startConsumer() stops the current consumer process (if any) and starts
                         a new one, listening on the indicated topics
      */
-    const startConsumer = (topics: string[]) => {
+    const reStartConsumer = async (topics: string[]) => {
+        updateStatus(`(re-)start consumer started`)
         // TODO do what the contract says above; must wait until we have an API or Kafka client (preferred / suggested)
-        updateStatus(`startConsumer(${topics}); TODO implement`)
-        refreshConsumer()
+        stopConsumer()
+        await startConsumer(topics)
+        updateStatus(`(re-)start consumer finished`)
     }
 
     const title = (text: string) => {
@@ -140,7 +163,7 @@ export default function Consumer() {
                             selectedTopics={['stream', 'seer-answer']}
                             textAreaClassName={textAreaClassName}
                             outputItemID={consumerLogID}
-                            onStartConsumer={startConsumer}
+                            onStartConsumer={reStartConsumer}
                         />
                     </div>
                 </div>
@@ -148,5 +171,6 @@ export default function Consumer() {
 
         </main>
     );
-}
+};
 
+export default Consumer;

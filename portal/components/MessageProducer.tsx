@@ -10,7 +10,7 @@ interface MessageProducerProps extends TextAreaProps {
     onDeliver: (topic: string, message: string) => void
 }
 
-export default ({textAreaClassName = "", knownTopics = [], selectedTopic, onDeliver}: MessageProducerProps): JSX.Element => {
+const MessageProducer = ({textAreaClassName = "", knownTopics = [], selectedTopic, onDeliver}: MessageProducerProps): JSX.Element => {
     const [currentlySelectedTopic, setCurrentlySelectedTopic] = useState(selectedTopic)
     const [message, setMessage] = useState('')
     return (
@@ -48,4 +48,6 @@ export default ({textAreaClassName = "", knownTopics = [], selectedTopic, onDeli
             </div>
         </div>
     );
-}
+};
+
+export default MessageProducer;

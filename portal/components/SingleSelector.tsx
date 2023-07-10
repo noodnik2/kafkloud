@@ -9,7 +9,7 @@ interface SingleSelectorProps {
     onChange: Dispatch<string | undefined | null>
 }
 
-export default ({labels, onChange, selectedLabel}: SingleSelectorProps) => {
+const SingleSelector = ({labels, onChange, selectedLabel}: SingleSelectorProps): JSX.Element => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState(labels.map(t => createOption(t)));
@@ -41,3 +41,5 @@ export default ({labels, onChange, selectedLabel}: SingleSelectorProps) => {
         />
     );
 };
+
+export default SingleSelector;

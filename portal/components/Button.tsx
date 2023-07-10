@@ -10,6 +10,8 @@ interface ButtonProps {
     onClick: () => void
 }
 
-export default ({type = 'button', name, onClick}: ButtonProps): JSX.Element => {
+const Button = ({type = 'button', name, onClick}: ButtonProps): JSX.Element => {
     return <button type={type} onClick={onClick} className={BUTTON_STYLES}>{name}</button>;
-}
+};
+
+export default Button;

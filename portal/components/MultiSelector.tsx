@@ -9,7 +9,7 @@ interface MultiSelectorProps {
     onChange: Dispatch<string[] | undefined | null>
 }
 
-export default ({labels, onChange, selectedLabels}: MultiSelectorProps) => {
+const MultiSelector = ({labels, onChange, selectedLabels}: MultiSelectorProps): JSX.Element => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState(labels.map(l => createOption(l)));
@@ -42,3 +42,5 @@ export default ({labels, onChange, selectedLabels}: MultiSelectorProps) => {
         />
     );
 };
+
+export default MultiSelector;
