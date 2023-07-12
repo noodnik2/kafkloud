@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,19 +15,6 @@ type Handlers struct {
 
 func (h *Handlers) respondWithString(w http.ResponseWriter, s string) error {
 	return h.respondWithBytes(w, []byte(s))
-}
-
-// TODO clarify why this is needed: the stdlib chunker should be flushing automatically if needed!
-func (h *Handlers) respondWithBytesAndFlush(w http.ResponseWriter, chunk []byte) error {
-	if err := h.respondWithBytes(w, chunk); err != nil {
-		return err
-	}
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		return errors.New("expected http.ResponseWriter to be an http.Flusher")
-	}
-	flusher.Flush()
-	return nil
 }
 
 func (h *Handlers) respondWithBytes(w http.ResponseWriter, bytes []byte) error {
@@ -62,13 +48,4 @@ func writeResponse(w http.ResponseWriter, r []byte) error {
 func setJsonResponseHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-}
-
-// TODO - is this needed?  Seems the stdlib should be doing this already
-func setChunkedResponseHeaders(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-
-	w.WriteHeader(http.StatusOK)
 }
