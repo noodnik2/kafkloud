@@ -11,11 +11,16 @@ export default async function handler(req: NextApiRequest, outboundResponse: Nex
     const config: AxiosRequestConfig = {
         responseType: 'stream',
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Transfer-Encoding': 'chunked',
+            'Accept': 'text/event-stream',
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
         },
     };
     await axios.get(url, config)
         .then((inboundResponse) => inboundResponse.data.pipe(outboundResponse))
-        .catch((reason) => outboundResponse.status(424).send(`caught error(${reason})`))
+        .catch((reason) => {
+            console.log(`error fetching from ${serviceAddr}: ${reason}`)
+            outboundResponse.status(424).send(`caught error(${reason})`)
+        })
 }

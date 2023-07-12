@@ -66,6 +66,9 @@ func setJsonResponseHeaders(w http.ResponseWriter) {
 
 // TODO - is this needed?  Seems the stdlib should be doing this already
 func setChunkedResponseHeaders(w http.ResponseWriter) {
-	w.Header().Set("Transfer-Encoding", "chunked")
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
 	w.WriteHeader(http.StatusOK)
 }

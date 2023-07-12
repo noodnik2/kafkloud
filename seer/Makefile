@@ -41,7 +41,7 @@ initialize-streamer: ## create the needed Kafka topics within the "streamer" com
 	done
 
 run-image: ## runs the currently built $(DOCKER_IMAGE) locally
-	docker run --env CHROMA_DB=chromadb:8020 --env KAFKA_BROKER=localhost:9092 -p 8030:8030 --network kafkloud-backend --env-file .env $(DOCKER_IMAGE)
+	docker run --env CHROMA_DB=chromadb:8020 --env KAFKA_BROKER=broker:9092 -p 8030:8030 --network kafkloud-backend --name seer --env-file .env $(DOCKER_IMAGE)
 
 run-new-image: build-new-image run-image ## runs a newly built $(DOCKER_IMAGE) locally
 

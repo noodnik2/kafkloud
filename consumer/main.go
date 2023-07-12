@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -83,7 +82,7 @@ func (as *appState) gracefulShutdown(cleanupFns []io.Closer) {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	sig := <-sigChan
 
-	fmt.Printf("terminating due to signal(%v)\n", sig)
+	log.Printf("terminating due to signal(%v)\n", sig)
 	ctx, cancel := context.WithTimeout(as.ctx, as.config.ShutdownWait)
 
 	go func() {
@@ -107,14 +106,15 @@ func (as *appState) gracefulShutdown(cleanupFns []io.Closer) {
 func newErrorHandler() util.ComponentErrorHandler {
 	var errorCount int
 	var lastErrorTime time.Time
-	const MaxErrorCount = 10
+	const MaxErrorCount = 1000 // max # of errors allowed within
+	const MaxErrorAccumulationWindow = 60 * time.Second
 	return func(err error) bool {
 
 		errorCount++
 		errorTime := time.Now()
-		fmt.Printf("error %d/%d received(%v)\n", errorCount, MaxErrorCount, err)
-		if !lastErrorTime.IsZero() && errorTime.Sub(lastErrorTime) > 60*time.Second {
-			fmt.Printf("reset error counter\n")
+		log.Printf("error %d/%d received(%v)\n", errorCount, MaxErrorCount, err)
+		if !lastErrorTime.IsZero() && errorTime.Sub(lastErrorTime) > MaxErrorAccumulationWindow {
+			log.Printf("reset error counter from %d to 0\n", errorCount)
 			errorCount = 0
 		}
 
@@ -123,7 +123,7 @@ func newErrorHandler() util.ComponentErrorHandler {
 			return false
 		}
 
-		fmt.Printf("terminating process due to error count\n")
+		log.Printf("terminating process due to unacceptably high frequency of errors\n")
 		_ = syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 		return true
 	}

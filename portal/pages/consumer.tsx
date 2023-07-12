@@ -74,14 +74,7 @@ const Consumer = (): JSX.Element => {
         })
     }
 
-    let consumer
-
-    const stopConsumer = () => {
-        // TODO: can this be implemented?
-        // updateStatus(`TODO: stop current consumer`)
-    }
-
-    const startConsumer = async (topics: string[]) => {
+    const runConsumer = async (topics: string[]) => {
 
         // Relevant:
         // - For XMLHttpRequest2:
@@ -91,7 +84,12 @@ const Consumer = (): JSX.Element => {
 
         // see:
         // - https://developer.chrome.com/articles/fetch-streaming-requests/
+
         const backendResponse = await fetch(url);
+        if (!backendResponse.ok) {
+            updateStatus(`fetch error: ${backendResponse.status} ${backendResponse.statusText}`)
+            return
+        }
         if (!backendResponse.body) {
             updateStatus(`error: no body from fetch to backend`)
             return
@@ -115,9 +113,8 @@ const Consumer = (): JSX.Element => {
      */
     const reStartConsumer = async (topics: string[]) => {
         updateStatus(`(re-)start consumer started`)
-        // TODO do what the contract says above; must wait until we have an API or Kafka client (preferred / suggested)
-        stopConsumer()
-        await startConsumer(topics)
+        // TODO do what the contract says above; should cancel any currently running consumer first
+        await runConsumer(topics)
         updateStatus(`(re-)start consumer finished`)
     }
 

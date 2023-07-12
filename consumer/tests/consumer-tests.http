@@ -1,4 +1,6 @@
 
+### Use "Transfer-Encoding: chunked" to stream messages from 'seer-answer' topic
+
 GET http://localhost:8072/consume?topics=seer-answer HTTP/1.1
 Host: localhost:8072
 Accept: */*
@@ -6,3 +8,6 @@ User-Agent: curl/7.88.1
 Transfer-Encoding: chunked
 Connection: keep-alive
 
+### Use "Server-Sent Events" to stream messages from 'seer-answer' topic (i.e., without headers)
+
+GET http://localhost:8072/consume?topics=seer-answer HTTP/1.1

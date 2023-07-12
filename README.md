@@ -201,16 +201,16 @@ is used (e.g., `kafkloud-backend` in the Docker deployments).
 An attempt is made to standardize and catalog the network addresses of the
 service across the supported deployment environments, as follows:
 
-| Component  | Docker              | Kubernetes                     |
-|------------|-------------------------|--------------------------------|
-| `portal`   | `portal:3000`           | `portal-svc:3000`              |
-| `consumer` | `consumer:8072`         | `consumer-svc:8072`            |
-| `producer` | `producer:8000`         | `producer-svc:8000`            |
-| `seer`     | `seer:8030`             | `seer-svc:8030`                |
-| `seer`     | `chromadb:8020`         | `chromadb-svc:8020`            |
-| `streamer`  | `broker:9092,9997,29092` | `broker-svc:9092,9997,29092`   |
-| `streamer`  | `kafkaui:8060`          | `kafkaui-svc:8060`             |
-| `streamer` | `zookeeper:2181,2888,3888`            | `zookeeper-svc:2181,2888,3888` |
+| Component  | Docker              | Kubernetes / NodePort                    |
+|------------|-------------------------|------------------------------------------|
+| `portal`   | `portal:3000`           | `portal-svc:3000` / `30080`              |
+| `consumer` | `consumer:8072`         | `consumer-svc:8072` / `30072`            |
+| `producer` | `producer:8000`         | `producer-svc:8000` / `30000`            |
+| `seer`     | `seer:8030`             | `seer-svc:8030` / `30030`                |
+| `seer`     | `chromadb:8020`         | `chromadb-svc:8020` / `30020`            |
+| `streamer`  | `broker:9092,9997,29092` | `broker-svc:9092,9997,29092`             |
+| `streamer`  | `kafkaui:8060`          | `kafkaui-svc:8060` / `32060`             |
+| `streamer` | `zookeeper:2181,2888,3888`            | `zookeeper-svc:2181,2888,3888` / `30181` |
 
 
 ## For Further Exploration
