@@ -5,7 +5,6 @@ import axios from 'axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const deliveryPkg = req.body;
-    console.log(`deliveryPkg(${deliveryPkg})`)
     const serviceAddr = getServiceAddr(SERVICENAME_COURIER);
     const message = JSON.stringify(deliveryPkg.message);
     const topic = deliveryPkg.topic;

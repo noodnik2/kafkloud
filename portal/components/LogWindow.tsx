@@ -1,15 +1,12 @@
-import {itemWithID, TextAreaProps, toLocalLogTime} from "@/components/CommonProps";
+import {TextAreaProps} from "@/components/CommonProps";
 import React from "react";
-import {useRecoilState} from "recoil";
 
 interface LogWindowProps extends TextAreaProps {
     loggerDescription?: string
-    loggerId: string
+    loggerText: string[]
 }
 
-const LogWindow = ({textAreaClassName = "", loggerDescription = '', loggerId}: LogWindowProps): JSX.Element => {
-
-    const [logText] = useRecoilState(itemWithID(loggerId))
+const LogWindow = ({textAreaClassName = "", loggerDescription = '', loggerText}: LogWindowProps): JSX.Element => {
 
     return (
         <div>
@@ -17,7 +14,7 @@ const LogWindow = ({textAreaClassName = "", loggerDescription = '', loggerId}: L
                 className={textAreaClassName}
                 readOnly
                 placeholder={loggerDescription}
-                value={logText.join('\n')}
+                value={loggerText.join('\n')}
             />
         </div>
     );

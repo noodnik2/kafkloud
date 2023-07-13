@@ -1,25 +1,24 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import Head from "next/head";
-import Button from "@/components/Button";
-import {useRecoilState} from "recoil";
-import {itemWithID, toLocalLogTime} from "@/components/CommonProps";
+import {toLocalLogTime} from "@/components/CommonProps";
 import LogWindow from "@/components/LogWindow";
 import MessageProducer from "@/components/MessageProducer";
 import MessageConsumer from "@/components/MessageConsumer";
+import {getServiceAddr, SERVICENAME_MONITOR} from "@/routes/info";
 
 const Consumer = (): JSX.Element => {
 
-    // recoil items
-    const consumerLogID = 'consumerLog'
-    const statusLogID = 'statusText'
+    const initialConsumerText: string[] = []
+    const initialStatusText: string[] = []
 
-    const textAreaClassName = "p-2 overflow-y-auto w-full h-24 min-h-full"
+    const knownTopics = ['stream', 'seer-statement', 'seer-question', 'seer-answer']
+    const initialProducerTopic = 'seer-question'
+    const initialConsumerTopics = ['seer-answer']
 
-    const [, setStatusText] = useRecoilState(itemWithID(statusLogID))
-    const [, setConsumerText] = useRecoilState(itemWithID(consumerLogID))
-
-    const [consumerUpdateCount, setConsumerUpdateCount] = useState(0);
+    const [statusText, setStatusText] = useState(initialStatusText)
+    const [consumerText, setConsumerText] = useState(initialConsumerText)
+    const [consumerTopics, setConsumerTopics] = useState(initialConsumerTopics);
 
     const timestamp = (s: string) => {
         return `${toLocalLogTime(new Date())} ${s}`
@@ -33,13 +32,15 @@ const Consumer = (): JSX.Element => {
         setConsumerText(currentLog => [...currentLog, timestamp(newLogEntry)]);
     }
 
-    const postToProducer = (payload: object) => {
+    const produce = (topic: string, message: string) => {
 
-        const producerRequest = JSON.stringify(payload)
+        const payload = {
+            topic: topic,
+            message: message,
+            key: new Date().toISOString(),
+        }
 
-        updateStatus(`postToProducer(${producerRequest})`);
-
-        const axiosHeaders = {
+        const headers = {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -47,12 +48,10 @@ const Consumer = (): JSX.Element => {
 
         const url = `/api/outbox`;
         console.log(`post(${url})`)
-        axios.post(url, producerRequest, axiosHeaders)
+        const jsonPayload = JSON.stringify(payload);
+        axios.post(url, jsonPayload, headers)
             .then((response) => {
-                const producerRequestResponse = `producerRequestResponseStatusText(${response.statusText})`;
-                updateStatus(producerRequestResponse);
-                console.log(`triggering a consumer update`);
-                setConsumerUpdateCount(consumerUpdateCount + 1);
+                updateStatus(`delivered(${jsonPayload}) with response(${response.statusText})`)
             })
             .catch((error) => {
                 const producerRequestError = `producerRequestError(${error})`;
@@ -62,67 +61,33 @@ const Consumer = (): JSX.Element => {
 
     }
 
-    /**
-        deliver() delivers the message to the producer
-     */
-    const deliver = (topic: string, message: string) => {
-        updateStatus(`deliver to topic(${topic}): "${message}"`);
-        postToProducer({
-            topic: topic,
-            key: new Date().toISOString(),
-            message: message
-        })
-    }
+    useEffect(() => {
 
-    const runConsumer = async (topics: string[]) => {
+        const serviceAddr = getServiceAddr(SERVICENAME_MONITOR);
+        const url = `${serviceAddr}/consume?topics=${consumerTopics}`;
 
-        // Relevant:
-        // - For XMLHttpRequest2:
-        //   - https://streams.spec.whatwg.org/#other-specs-rs-reading
-        //   - https://streams.spec.whatwg.org/#read-loop
-        const url = `/api/consume?topics=${topics}`;
-
-        // see:
-        // - https://developer.chrome.com/articles/fetch-streaming-requests/
-
-        const backendResponse = await fetch(url);
-        if (!backendResponse.ok) {
-            updateStatus(`fetch error: ${backendResponse.status} ${backendResponse.statusText}`)
-            return
-        }
-        if (!backendResponse.body) {
-            updateStatus(`error: no body from fetch to backend`)
-            return
-        }
-        const reader = backendResponse.body
-            .pipeThrough(new TextDecoderStream('utf-8'))
-            .getReader()
-        while(true) {
-            const {value, done} = await reader.read()
-            if (done) {
-                break
-            }
-            updateConsumerLog(`${value}`)
+        const es = new EventSource(url);
+        es.onmessage = console.log
+        es.onerror = console.log
+        es.onopen = console.log
+        es.addEventListener('open', () => updateStatus(`opened ${url}`));
+        es.addEventListener('streamer', (e) => updateConsumerLog(e.data));
+        es.addEventListener('error', () => updateStatus(`error from ${url}`));
+        updateStatus(`requesting ${url}`);
+        return () => {
+            updateStatus(`closing ${url}`);
+            es.close();
         }
 
-    }
-
-    /**
-        startConsumer() stops the current consumer process (if any) and starts
-                        a new one, listening on the indicated topics
-     */
-    const reStartConsumer = async (topics: string[]) => {
-        updateStatus(`(re-)start consumer started`)
-        // TODO do what the contract says above; should cancel any currently running consumer first
-        await runConsumer(topics)
-        updateStatus(`(re-)start consumer finished`)
-    }
+    }, [consumerTopics]);
 
     const title = (text: string) => {
         return (
             <h1 className="p-2 text-2xl decoration-2 font-bold">{text}</h1>
         );
     }
+
+    const textAreaClassName = "p-2 overflow-y-auto w-full h-24 min-h-full"
 
     return (
         <main className="flex items-center justify-around font-sans">
@@ -131,15 +96,10 @@ const Consumer = (): JSX.Element => {
             </Head>
 
             <div className="p-2 m-5 w-full shadow-2xl drop-shadow-lg space-y-3">
-                <div>
-                    <Button name="test" onClick={() => {
-                        setStatusText(oldArray => [...oldArray, 'testing setting the status text']);
-                    }} />
-                </div>
                 <div className="border-2 border-black bg-blue-50">
-                    {title("Status")}
+                    {title("Status Updates")}
                     <LogWindow
-                        loggerId={statusLogID}
+                        loggerText={statusText}
                         loggerDescription="Consumer status updates"
                         textAreaClassName={textAreaClassName}
                     />
@@ -148,19 +108,20 @@ const Consumer = (): JSX.Element => {
                     {title("Messages")}
                     <div className="box-border border-dashed border-2">
                         <MessageProducer
-                            knownTopics={['stream', 'seer-statement', 'seer-question']}
-                            selectedTopic='stream'
+                            knownTopics={knownTopics}
+                            initiallySelectedTopic={initialProducerTopic}
                             textAreaClassName={textAreaClassName}
-                            onDeliver={deliver}
+                            onDeliver={produce}
                         />
                     </div>
                     <div className="box-border border-dashed border-2">
                         <MessageConsumer
-                            knownTopics={['stream', 'seer-answer']}
-                            selectedTopics={['stream', 'seer-answer']}
+                            knownTopics={knownTopics}
+                            currentTopics={consumerTopics}
                             textAreaClassName={textAreaClassName}
-                            outputItemID={consumerLogID}
-                            onStartConsumer={reStartConsumer}
+                            loggerText={consumerText}
+                            onTopicsChange={setConsumerTopics}
+                            onClearConsumer={() => setConsumerText([])}
                         />
                     </div>
                 </div>

@@ -49,28 +49,28 @@ func (kc *KafkaConsumer) Launch() error {
 	}
 
 	topics := kc.Topics
-	log.Printf("subscribing Kafka listener(%v)\n", topics)
+	log.Printf("(%v) subscribing Kafka listener\n", topics)
 	if errSubscribe := consumer.SubscribeTopics(topics, nil); errSubscribe != nil {
-		log.Printf("can't subscribe to Kafka topics(%v) ...\n", topics)
-		closeConsumer(consumer)
+		log.Printf("(%v) can't subscribe to Kafka topics: %v\n", topics, errSubscribe)
+		closeConsumer(consumer, topics)
 		return errSubscribe
 	}
 
 	go func() {
 
 		var errKafkaMessagePump error
-		defer func() { log.Printf("Kafka listener(%v) stopped; err=%v...\n", topics, errKafkaMessagePump) }()
-		defer func() { kc.DoneChan <- time.Now(); log.Printf("Kafka listener exited\n") }()
-		defer func() { closeConsumer(consumer) }()
+		defer func() { log.Printf("(%v) Kafka listener stopped; err=%v...\n", topics, errKafkaMessagePump) }()
+		defer func() { kc.DoneChan <- time.Now(); log.Printf("(%v) Kafka listener exited\n", topics) }()
+		defer func() { closeConsumer(consumer, topics) }()
 
 		for {
 
 			if kc.quitRequest.Load() {
-				log.Printf("Kafka listener(%v) closing...\n", topics)
+				log.Printf("(%v) Kafka listener closing...\n", topics)
 				break
 			}
 
-			log.Printf("Kafka listener(%v) waiting...\n", topics)
+			log.Printf("(%v) Kafka listener waiting...\n", topics)
 
 			var kafkaMsg *kafka.Message
 			kafkaMsg, errKafkaMessagePump = consumer.ReadMessage(kc.WaitTimeout)
@@ -78,9 +78,9 @@ func (kc *KafkaConsumer) Launch() error {
 				if errKafkaMessagePump.(kafka.Error).Code() == kafka.ErrTimedOut {
 					continue
 				}
-				log.Printf("Kafka listener(%v) encountered an error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
+				log.Printf("(%v) Kafka listener encountered an error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
 				if kc.ComponentErrorHandler(errKafkaMessagePump) {
-					log.Printf("Kafka listener(%v) stopped due to the error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
+					log.Printf("(%v) Kafka listener stopped due to the error: %v msg(%v)\n", topics, errKafkaMessagePump, kafkaMsg)
 					break
 				}
 				continue
@@ -90,30 +90,30 @@ func (kc *KafkaConsumer) Launch() error {
 			if kafkaMsg.TopicPartition.Topic != nil {
 				messageTopic = *kafkaMsg.TopicPartition.Topic
 			}
-			log.Printf("Kafka listener(%v) received topic(%s) message: %s\n", topics, messageTopic, messageText)
+			log.Printf("(%v) Kafka listener received topic(%s) message: %s\n", topics, messageTopic, messageText)
 			if errProcess := kc.Processor.ProcessMessage(messageTopic, messageText); errProcess != nil {
-				log.Printf("Kafka listener(%v) stopped due to an error processing the message: %v msg(%v)\n", topics, errProcess, kafkaMsg)
+				log.Printf("(%v) Kafka listener stopped due to an error processing the message: %v msg(%v)\n", topics, errProcess, kafkaMsg)
 				break
 			}
 		}
 	}()
 
-	log.Printf("launched Kafka listener(%v)\n", topics)
+	log.Printf("(%v) launched Kafka listener\n", topics)
 	return nil
 }
 
 func (kc *KafkaConsumer) Close() error {
-	log.Printf("signaling Kafka listener(%v) to close\n", kc.Topics)
+	log.Printf("(%v) signaling Kafka listener to close\n", kc.Topics)
 	kc.quitRequest.Store(true)
-	log.Printf("waiting for Kafka listener(%v) to close\n", kc.Topics)
+	log.Printf("(%v) waiting for Kafka listener to close\n", kc.Topics)
 	<-kc.DoneChan
-	log.Printf("Kafka listener(%v) has closed\n", kc.Topics)
+	log.Printf("(%v) Kafka listener has closed\n", kc.Topics)
 	return nil
 }
 
-func closeConsumer(consumer *kafka.Consumer) {
-	log.Printf("closing Kafka listener\n")
+func closeConsumer(consumer *kafka.Consumer, topics []string) {
+	log.Printf("(%v) closing Kafka listener\n", topics)
 	if errCloseListener := consumer.Close(); errCloseListener != nil {
-		log.Printf("error closing Kafka listener: %v\n", errCloseListener)
+		log.Printf("(%v) error closing Kafka listener: %v\n", topics, errCloseListener)
 	}
 }

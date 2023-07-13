@@ -7,35 +7,27 @@ import LogWindow from "@/components/LogWindow";
 
 interface MessageConsumerProps extends TextAreaProps {
     knownTopics?: string[]
-    selectedTopics?: string[]
-    outputItemID: string
-    onStartConsumer: (topics: string[]) => void
+    currentTopics?: string[]
+    loggerText: string[]
+    onTopicsChange: (topics: string[]) => void
+    onClearConsumer: () => void
 }
 
-const MessageConsumer = ({textAreaClassName = "", knownTopics = [], selectedTopics = [], outputItemID, onStartConsumer}: MessageConsumerProps): JSX.Element => {
-
-    const [currentlySelectedTopics, setCurrentlySelectedTopics] = useState(selectedTopics);
+const MessageConsumer = ({textAreaClassName = "", knownTopics = [], currentTopics = [], loggerText, onTopicsChange, onClearConsumer}: MessageConsumerProps): JSX.Element => {
 
     return (
         <div>
             <span>
-                <Button
-                    name="Consume"
-                    onClick={
-                        () => {
-                            onStartConsumer(currentlySelectedTopics)
-                        }
-                    }
-                />
-                <span className="h-1 p-1 m-1">From Topics <TbArrowBigRightLines className="inline"/></span>
+                <Button name="Clear" onClick={onClearConsumer} />
+                <span className="h-1 p-1 m-1">Consume From Topics <TbArrowBigRightLines className="inline"/></span>
                 <span className="w-96 w-fit float-right">
                     <MultiSelector
                         labels={knownTopics}
-                        selectedLabels={currentlySelectedTopics}
+                        selectedLabels={currentTopics}
                         onChange={
                             topics => {
                                 if (topics) {
-                                    setCurrentlySelectedTopics(topics)
+                                    onTopicsChange(topics)
                                 }
                             }
                         }
@@ -44,7 +36,7 @@ const MessageConsumer = ({textAreaClassName = "", knownTopics = [], selectedTopi
             </span>
             <div>
                 <LogWindow
-                    loggerId={outputItemID}
+                    loggerText={loggerText}
                     textAreaClassName={textAreaClassName}
                     loggerDescription="Text received from the selected topic(s)"
                 />

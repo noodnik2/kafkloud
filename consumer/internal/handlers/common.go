@@ -4,9 +4,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync/atomic"
 
 	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/controller"
 )
+
+var requestId atomic.Uint64
+
+func nextRequestId() uint64 {
+	return requestId.Add(1)
+}
 
 type Handlers struct {
 	*controller.Counter

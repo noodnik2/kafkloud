@@ -5,18 +5,18 @@ import {Option, createOption} from "@/components/CommonProps";
 
 interface SingleSelectorProps {
     labels: string[]
-    selectedLabel?: string
+    selectedOption?: string
     onChange: Dispatch<string | undefined | null>
 }
 
-const SingleSelector = ({labels, onChange, selectedLabel}: SingleSelectorProps): JSX.Element => {
+const SingleSelector = ({labels, onChange, selectedOption}: SingleSelectorProps): JSX.Element => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [options, setOptions] = useState(labels.map(t => createOption(t)));
-    const [selectedOption, setSelectedOption] = useState<Option | undefined | null>(selectedLabel? createOption(selectedLabel): null);
+    const [currentlySelectedOption, setCurrentlySelectedOption] = useState<Option | undefined | null>(selectedOption? createOption(selectedOption): null);
 
     const setAndDispatchValue = (option: Option | null | undefined) => {
-        setSelectedOption(option)
+        setCurrentlySelectedOption(option)
         onChange(option?.label)
     }
 
@@ -25,7 +25,7 @@ const SingleSelector = ({labels, onChange, selectedLabel}: SingleSelectorProps):
         const newOption = createOption(inputValue);
         setIsLoading(false);
         setOptions((prev) => [...prev, newOption]);
-        setSelectedOption(newOption)
+        setCurrentlySelectedOption(newOption)
         setAndDispatchValue(newOption)
     };
 
@@ -37,7 +37,7 @@ const SingleSelector = ({labels, onChange, selectedLabel}: SingleSelectorProps):
             onChange={(newValue) => setAndDispatchValue(newValue)}
             onCreateOption={handleCreate}
             options={options}
-            value={selectedOption}
+            value={currentlySelectedOption}
         />
     );
 };

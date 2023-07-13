@@ -6,16 +6,17 @@ import { TbArrowBigRightLines } from 'react-icons/tb';
 
 interface MessageProducerProps extends TextAreaProps {
     knownTopics?: string[]
-    selectedTopic: string
+    initiallySelectedTopic: string
     onDeliver: (topic: string, message: string) => void
 }
 
-const MessageProducer = ({textAreaClassName = "", knownTopics = [], selectedTopic, onDeliver}: MessageProducerProps): JSX.Element => {
-    const [currentlySelectedTopic, setCurrentlySelectedTopic] = useState(selectedTopic)
+const MessageProducer = ({textAreaClassName = "", knownTopics = [], initiallySelectedTopic, onDeliver}: MessageProducerProps): JSX.Element => {
+    const [currentlySelectedTopic, setCurrentlySelectedTopic] = useState(initiallySelectedTopic)
     const [message, setMessage] = useState('')
     return (
         <div>
             <span>
+                <Button name="Clear" onClick={() => setMessage('')} />
                 <Button
                     name="Produce"
                     onClick={
@@ -28,7 +29,7 @@ const MessageProducer = ({textAreaClassName = "", knownTopics = [], selectedTopi
                 <span className="w-96 w-fit float-right">
                     <SingleSelector
                         labels={knownTopics}
-                        selectedLabel='stream'
+                        selectedOption={currentlySelectedTopic}
                         onChange={
                             topic => {
                                 if (topic) {
@@ -43,6 +44,7 @@ const MessageProducer = ({textAreaClassName = "", knownTopics = [], selectedTopi
                 <textarea
                     className={textAreaClassName}
                     placeholder="Enter the value you wish to deliver to the selected topic here"
+                    value={message}
                     onChange={e => setMessage(e.target.value)}
                 />
             </div>
