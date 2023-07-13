@@ -1,85 +1,21 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, {useState} from 'react';
 import Head from "next/head";
-import {toLocalLogTime} from "@/components/CommonProps";
+import {logEntry} from "@/components/CommonProps";
 import LogWindow from "@/components/LogWindow";
 import MessageProducer from "@/components/MessageProducer";
 import MessageConsumer from "@/components/MessageConsumer";
-import {getServiceAddr, SERVICENAME_MONITOR} from "@/routes/info";
 
 const Consumer = (): JSX.Element => {
-
-    const initialConsumerText: string[] = []
-    const initialStatusText: string[] = []
 
     const knownTopics = ['stream', 'seer-statement', 'seer-question', 'seer-answer']
     const initialProducerTopic = 'seer-question'
     const initialConsumerTopics = ['seer-answer']
 
-    const [statusText, setStatusText] = useState(initialStatusText)
-    const [consumerText, setConsumerText] = useState(initialConsumerText)
-    const [consumerTopics, setConsumerTopics] = useState(initialConsumerTopics);
+    const [statusText, setStatusText] = useState([] as string[])
 
-    const timestamp = (s: string) => {
-        return `${toLocalLogTime(new Date())} ${s}`
+    const updateStatus = (statusUpdate: string) => {
+        setStatusText(currentStatus => [...currentStatus, logEntry(statusUpdate)]);
     }
-
-    const updateStatus = (newLogEntry: string) => {
-        setStatusText(currentLog => [...currentLog, timestamp(newLogEntry)]);
-    }
-
-    const updateConsumerLog = (newLogEntry: string) => {
-        setConsumerText(currentLog => [...currentLog, timestamp(newLogEntry)]);
-    }
-
-    const produce = (topic: string, message: string) => {
-
-        const payload = {
-            topic: topic,
-            message: message,
-            key: new Date().toISOString(),
-        }
-
-        const headers = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-
-        const url = `/api/outbox`;
-        console.log(`post(${url})`)
-        const jsonPayload = JSON.stringify(payload);
-        axios.post(url, jsonPayload, headers)
-            .then((response) => {
-                updateStatus(`delivered(${jsonPayload}) with response(${response.statusText})`)
-            })
-            .catch((error) => {
-                const producerRequestError = `producerRequestError(${error})`;
-                console.error(producerRequestError);
-                updateStatus(producerRequestError);
-            });
-
-    }
-
-    useEffect(() => {
-
-        const serviceAddr = getServiceAddr(SERVICENAME_MONITOR);
-        const url = `${serviceAddr}/consume?topics=${consumerTopics}`;
-
-        const es = new EventSource(url);
-        es.onmessage = console.log
-        es.onerror = console.log
-        es.onopen = console.log
-        es.addEventListener('open', () => updateStatus(`opened ${url}`));
-        es.addEventListener('streamer', (e) => updateConsumerLog(e.data));
-        es.addEventListener('error', () => updateStatus(`error from ${url}`));
-        updateStatus(`requesting ${url}`);
-        return () => {
-            updateStatus(`closing ${url}`);
-            es.close();
-        }
-
-    }, [consumerTopics]);
 
     const title = (text: string) => {
         return (
@@ -111,17 +47,15 @@ const Consumer = (): JSX.Element => {
                             knownTopics={knownTopics}
                             initiallySelectedTopic={initialProducerTopic}
                             textAreaClassName={textAreaClassName}
-                            onDeliver={produce}
+                            onStatusUpdate={(statusText) => updateStatus(statusText)}
                         />
                     </div>
                     <div className="box-border border-dashed border-2">
                         <MessageConsumer
                             knownTopics={knownTopics}
-                            currentTopics={consumerTopics}
+                            initialConsumerTopics={initialConsumerTopics}
                             textAreaClassName={textAreaClassName}
-                            loggerText={consumerText}
-                            onTopicsChange={setConsumerTopics}
-                            onClearConsumer={() => setConsumerText([])}
+                            onStatusUpdate={(statusText) => updateStatus(statusText)}
                         />
                     </div>
                 </div>
