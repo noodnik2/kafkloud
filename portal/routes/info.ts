@@ -3,6 +3,10 @@ export const SERVICENAME_MONITOR = "monitor";
 export const SERVICENAME_COURIER = "courier";
 
 export function getServiceAddr(serviceName: string): string {
+
+    // console.log(`process.env:`)
+    // Object.keys(process.env).forEach((prop, index, value)=> console.log(`${prop}=${value}`));
+
     let serviceAddr;
     switch(serviceName) {
         case SERVICENAME_MONITOR:

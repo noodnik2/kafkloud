@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import Button from "@/components/Button";
 import MultiSelector from "@/components/MultiSelector";
 import {TextAreaProps, logEntry} from "@/components/CommonProps";
 import {TbArrowBigRightLines} from "react-icons/tb";
 import LogWindow from "@/components/LogWindow";
-import {getServiceAddr, SERVICENAME_MONITOR} from "@/routes/info";
 
 interface MessageConsumerProps extends TextAreaProps {
     knownTopics?: string[]
@@ -17,14 +16,20 @@ const MessageConsumer = ({textAreaClassName = "", knownTopics = [], initialConsu
     const [consumerText, setConsumerText] = useState([] as string[])
     const [consumerTopics, setConsumerTopics] = useState(initialConsumerTopics);
 
-    const updateConsumerLog = (newLogEntry: string) => {
+    // const updateConsumerLog = useCallback((newLogEntry: string) => {
+    //     setConsumerText(currentLog => [...currentLog, logEntry(newLogEntry)]);
+    // }, []);
+    //
+    // const updateStatus = useCallback((statusUpdate: string) => {
+    //     onStatusUpdate(statusUpdate);
+    // }, []);
+    const updateConsumerLog =(newLogEntry: string) => {
         setConsumerText(currentLog => [...currentLog, logEntry(newLogEntry)]);
-    }
+    };
 
     useEffect(() => {
 
-        const serviceAddr = getServiceAddr(SERVICENAME_MONITOR);
-        const url = `${serviceAddr}/consume?topics=${consumerTopics}`;
+        const url = `/api/consume?topics=${consumerTopics}`
         onStatusUpdate(`consumer URL: ${url}`);
 
         const es = new EventSource(url);
