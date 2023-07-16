@@ -1,0 +1,10 @@
+
+### Use event streaming to "subscribe" to the "seer-answer" Streamer topic
+
+GET http://localhost:8072/consume?topics=seer-answer
+Accept: text/event-stream
+
+### Try using improper 'Accept' type for SSE
+
+GET http://localhost:8072/consume?topics=seer-answer
+Accept: text/plain

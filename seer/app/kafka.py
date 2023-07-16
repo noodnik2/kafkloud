@@ -72,15 +72,16 @@ class KafkaSeer:
             self.seer.accept([str(data)])
             self.logger.debug(f"seer accepted({data})")
         elif topic == "seer-question":
-            seer_answer = self.seer.ask([str(data)])
-            self.logger.debug(f"seer was asked({data}) and responded({seer_answer})")
-            self._deliver_answer(seer_answer)
+            seer_answers = self.seer.ask([str(data)])
+            self.logger.debug(f"seer was asked({data}) and responded({seer_answers})")
+            for seer_answer in seer_answers:
+                self._deliver_answers(seer_answer)
         self.consumer.store_offsets(msg)
 
-    def _deliver_answer(self, answer):
+    def _deliver_answers(self, answer):
         self.logger.debug(f"delivering answer({answer}) to topic({KAFKA_TOPIC_ANSWER})")
         try:
-            self.producer.produce(KAFKA_TOPIC_ANSWER, key="answer", value=str(answer), callback=self._delivery_callback)
+            self.producer.produce(KAFKA_TOPIC_ANSWER, key="seer-answer", value=str(answer), callback=self._delivery_callback)
 
         except BufferError:
             self.logger.warning(f"producer queue is full ({len(self.producer)} message(s) awaiting delivery)")

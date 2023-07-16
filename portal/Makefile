@@ -34,7 +34,8 @@ push-image: ## pushes the currently built $(DOCKER_IMAGE) to the external reposi
 push-new-image: build-new-image push-image ## pushes a newly (re-)built $(DOCKER_IMAGE) to the external repository
 
 run-image: ## runs the currently built $(DOCKER_IMAGE) locally
-	docker run -p 3000:3000 $(DOCKER_IMAGE)
+	docker run -e NODE_ENV=development -e NEXT_PUBLIC_CONSUMER_ADDR=http://consumer:8072 -e NEXT_PUBLIC_PRODUCER_ADDR=http://producer:8000 \
+				--network kafkloud-backend -p 3000:3000 --name $(APP_NAME) -e HOSTNAME=$(APP_NAME) $(DOCKER_IMAGE)
 
 run-new-image: build-new-image run-image ## runs a newly built $(DOCKER_IMAGE) locally
 

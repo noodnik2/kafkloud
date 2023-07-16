@@ -1,0 +1,6 @@
+
+### Try out the consumer proxy
+
+GET http://localhost:3000/api/consume?topics=seer-answer
+Accept: text/event-stream
+Connection: keep-alive

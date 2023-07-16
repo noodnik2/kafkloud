@@ -72,6 +72,12 @@ something like:
 4. `push[-new]-image` - deploy docker image to repository
 5. `apply-k8s` - deploy to Kubernetes
 
+As of this writing (7/16/23), the OpenAI API key must be manually injected
+into Kubernetes so that `seer` can use it.  Assuming the key was already
+entered into the `.env` file (where it is read from in local deployments),
+the following command could work for this purpose:
+- `kubectl create secret generic seer-dotenv --from-env-file=.env`
+
 ### Via CLI
 
 The [CLI](app/cli.py) provides direct access to `seer` APIs; that is, it can't be used to

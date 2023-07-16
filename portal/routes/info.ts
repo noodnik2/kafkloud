@@ -1,14 +1,18 @@
 
-export const SERVICENAME_MONITOR = "courier";
-export const SERVICENAME_COURIER = "monitor";
+export const SERVICENAME_MONITOR = "monitor";
+export const SERVICENAME_COURIER = "courier";
 
 export function getServiceAddr(serviceName: string): string {
+
+    // console.log(`process.env:`)
+    // Object.keys(process.env).forEach((prop, index, value)=> console.log(`${prop}=${value}`));
+
     let serviceAddr;
     switch(serviceName) {
-        case SERVICENAME_MONITOR: // TODO rename "consumer" to "monitor"
+        case SERVICENAME_MONITOR:
             serviceAddr = process.env.NEXT_PUBLIC_CONSUMER_ADDR;
             break;
-        case SERVICENAME_COURIER:    // TODO rename "producer" to "courier"
+        case SERVICENAME_COURIER:
             serviceAddr = process.env.NEXT_PUBLIC_PRODUCER_ADDR;
             break;
     }

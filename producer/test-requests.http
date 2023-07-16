@@ -12,3 +12,15 @@ Content-Type: application/json
     "text": "this is the message being produced from the producer test"
   }
 }
+
+### Send a "seer" answer
+POST http://localhost:8000/produce/seer-answer/question1
+Content-Type: application/json
+
+{
+  "session": 998,
+  "type": "produce",
+  "message": {
+    "text": "The answer to your questdddion is: \"of course!\" ;-)"
+  }
+}

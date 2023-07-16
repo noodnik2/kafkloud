@@ -20,8 +20,6 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
@@ -33,10 +31,15 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+COPY --from=builder --chown=nextjs:nodejs /app/env-launcher.sh .
+RUN touch .env.local
+RUN chown nextjs:nodejs .env.local
+
+
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT 3000
 
-CMD ["node", "server.js"]
+CMD ["/bin/sh", "./env-launcher.sh", ".env.local", "HOSTNAME NODE_ENV NEXT_PUBLIC_CONSUMER_ADDR NEXT_PUBLIC_PRODUCER_ADDR" , "exec", "node", "server.js"]

@@ -3,70 +3,61 @@ package server
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
-	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/configs"
-	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/controller"
 	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/handlers"
 	"github.com/noodnik2/incubator20/k8s/kafkloud/consumer/internal/util"
 )
 
 type Server struct {
-	sconfig    *configs.ServerConfig
-	controller controller.Controller
-	srv        *http.Server
-	ctx        context.Context
-}
-
-func NewServer(ctx context.Context, sconfig *configs.ServerConfig, controller controller.Controller) *Server {
-	return &Server{
-		sconfig:    sconfig,
-		controller: controller,
-		ctx:        ctx,
-	}
+	Addr         string
+	WriteTimeout time.Duration
+	ReadTimeout  time.Duration
+	IdleTimeout  time.Duration
+	context.Context
+	*handlers.Handlers
+	util.ComponentErrorHandler
+	*http.Server
 }
 
 func (s *Server) Launch(util.ComponentErrorHandler) error {
 
-	h := handlers.NewHandlers(s.controller)
+	h := s.Handlers
 	r := mux.NewRouter()
 
-	// set content type
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("serving %s\n", r.URL.String())
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			next.ServeHTTP(w, r)
-		})
-	})
-
+	r.HandleFunc("/consume", h.SseConsumerHandler).Methods(http.MethodGet)
 	r.HandleFunc("/_health", h.HealthHandler).Methods(http.MethodGet)
 	r.HandleFunc("/status", h.StatusHandler).Methods(http.MethodGet)
 	http.Handle("/", r)
 
-	s.srv = &http.Server{
-		Addr:         s.sconfig.Addr,
-		WriteTimeout: s.sconfig.WriteTimeout,
-		ReadTimeout:  s.sconfig.ReadTimeout,
-		IdleTimeout:  s.sconfig.IdleTimeout,
+	s.Server = &http.Server{
+		Addr:         s.Addr,
+		WriteTimeout: s.WriteTimeout,
+		ReadTimeout:  s.ReadTimeout,
+		IdleTimeout:  s.IdleTimeout,
 		Handler:      r,
+		ErrorLog:     log.Default(),
+		ConnState: func(conn net.Conn, state http.ConnState) {
+			log.Printf("connection state change; conn(%v), state(%v)\n", conn.RemoteAddr(), state)
+		},
 	}
 
 	go func() {
-		err := s.srv.ListenAndServe()
+		err := s.Server.ListenAndServe()
 		log.Printf("Server stopped; err=%v...\n", err)
 	}()
 
-	log.Printf("launched Server on(%s)\n", s.srv.Addr)
+	log.Printf("launched Server on(%s)\n", s.Server.Addr)
 	return nil
 }
 
 func (s *Server) Close() error {
 	log.Printf("shutting down Server...\n")
-	if errShutdown := s.srv.Shutdown(s.ctx); errShutdown != nil {
+	if errShutdown := s.Server.Shutdown(s.Context); errShutdown != nil {
 		log.Printf("server shutdown error: %v\n", errShutdown)
 	}
 	return nil
