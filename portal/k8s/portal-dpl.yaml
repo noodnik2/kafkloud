@@ -28,3 +28,7 @@ spec:
         env:
           - name: NODE_ENV
             value: "production"
+          - name: NEXT_PUBLIC_CONSUMER_ADDR
+            value: "http://consumer-svc:8072"
+          - name: NEXT_PUBLIC_PRODUCER_ADDR
+            value: "http://producer-svc:8000"
