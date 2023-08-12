@@ -9,24 +9,26 @@ supporting multiple producers and consumers, with a feedback loop.
 
 ## Repository
 
-The project is organized into a "monorepo" in which all necessary components
+The project is source-controlled as in GitHub as a "monorepo" in which all necessary components
 are self-contained.
 
 ## Technologies
 
-The initiative should use as many of the target technologies as plausible:
+Multiple technologies were targeted for inclusion in order to meet the projects' goals, including:
 
-- Frontend (`ReactJS`, `Tailwind`, `Jupyter`)
-- Programming Languages (`Typescript`, `Go`, `Python`)
-- Middleware (`Kubernetes`, `Docker`, `NextJS`, `ExpressJS`, `gorilla/mux`)
-- Backend (`Kafka`)
-- Cloud Deployment (`GCP`, `Terraform`)
+- Frontend ([`ReactJS`], [`Tailwind`], [`Jupyter`], [`cobra`])
+- Programming Languages ([`Typescript`, [`Go`], [`Python`])
+- Middleware ([`Kubernetes`], [`Docker`], [`NextJS`], [`ExpressJS`], [`gorilla`])
+- Backend ([`Kafka`])
+- Cloud Deployment ([`GCP`], [`Terraform`])
+- Large Language Models ([`OpenAI API`], [`chroma`])
 
 ## Requirements
 
-As of this writing, the clearest "business use case" that is in hand focuses
-on "getting experience with" and "demonstrating" the use of the target technologies
-identified above.
+The primary "business use case" for this project is to gain and demonstrate experience with
+the target technologies identified above.  
+
+- A _nice to have_ is to create something that's actually useful 🤭.
 
 ## Design
 
@@ -49,9 +51,8 @@ use cases might be able to leverage this framework in the future.
 ![First Use Case Diagram](docs/kafkloud-firstusecase-1xbg.png)
 _(diagram created with [excalidraw](https://excalidraw.com/))_
 
-Keeping it simple, the first delivery milestone will demonstrate flow of
-information across several components; the following components / endpoints
-will facilitate demonstration of meeting this goal:
+Keeping it simple, the first delivery milestone demonstrated flow of information across several
+components.  The following components / endpoints facilitated demonstration of having met this goal:
 
 #### Component: `portal`
 - `DoIt` - UI button triggering a call to `producer` resulting in a message being sent to `streamer`
@@ -65,6 +66,25 @@ will facilitate demonstration of meeting this goal:
 
 #### Component: `consumer`
 - `/status` - HTTP `GET` endpoint retrieving the evidence of `producer` message(s)
+
+### Second Use Case
+
+In order to get on the bandwagon of experience with [Large Language Models](https://en.wikipedia.org/wiki/Large_language_model),
+another component endearingly named `seer` (mainly due to the level of insight it's expected to
+bring), was added to Kafkloud, and hung directly on to `streamer` for its interaction with the
+other components.
+
+Depiction of this change and the resulting augmented set of components:
+
+![Kafkloud with Seer](docs/230718-kafkloud-v2-d1.excalidraw.svg)
+
+The following sequence depicts the targeted main flow for this use case:
+
+User interaction as depicted above required an enhancement / generalization of the
+`portal` component, so the following sketch was produced as a target for the needed
+change:
+
+![Redesigned Portal Sketch](portal/notes/beautification-design1.svg)
 
 ## Implementation
 
@@ -221,3 +241,22 @@ this project, and warrant further exploration:
 - [Kubeshark](https://kubeshark.co/) - could be useful to help quickly triage issues with `Kubernetes` deployments
 - [Kubernetes Management Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - _might_
   be preferable to using the `Kubernetes` CLIs in _some cases_ :sunglasses:
+
+
+[`ReactJS`]: https://react.dev/
+[`Tailwind`]: https://tailwindcss.com/
+[`Jupyter`]: https://jupyter.org/
+[`cobra`]: https://cobra.dev/
+[`Typescript`]: https://www.typescriptlang.org/
+[`Go`]: https://go.dev/
+[`Python`]: https://www.python.org/
+[`Kubernetes`]: https://kubernetes.io/
+[`Docker`]: https://www.docker.com/
+[`NextJS`]: https://nextjs.org/
+[`ExpressJS`]: https://expressjs.com/
+[`gorilla`]: https://gorilla.github.io/
+[`Kafka`]: https://kafka.apache.org/
+[`GCP`]: https://cloud.google.com
+[`Terraform`]: https://www.terraform.io/
+[`OpenAI API`]: https://platform.openai.com/docs/api-reference 
+[`chroma`]: https://www.trychroma.com/
